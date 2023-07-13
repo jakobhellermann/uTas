@@ -1,0 +1,74 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="clr-namespace:TasEditor.Views"
+        xmlns:viewModels="clr-namespace:TasEditor.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="800"
+        x:Class="TasEditor.Views.MainWindow"
+        x:DataType="viewModels:MainViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="uTas"
+
+        ExtendClientAreaToDecorationsHint="True"
+        TransparencyLevelHint="AcrylicBlur"
+        Background="Transparent"
+
+        Width="450"
+        Height="800">
+    <Design.DataContext>
+        <viewModels:MainViewModel />
+    </Design.DataContext>
+
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding IncreaseFontSize}" />
+        <KeyBinding Gesture="Ctrl+OemMinus" Command="{Binding DecreaseFontSize}" />
+    </Window.KeyBindings>
+
+    <Panel>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="1"
+                    MaterialOpacity="0.7" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+
+
+        <Grid RowDefinitions="Auto,*" ColumnDefinitions="Auto,*">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_File">
+                    <MenuItem Header="_New File" />
+                    <MenuItem Header="_Open File" />
+                    <MenuItem Header="_Save As..." HotKey="Ctrl+Shift+S" />
+                </MenuItem>
+                <MenuItem Header="_Settings">
+
+                    <MenuItem Header="_Ui">
+                        <MenuItem Header="Increase Font Size" Command="{Binding IncreaseFontSize}" />
+                        <MenuItem Header="Decrease Font Size" Command="{Binding DecreaseFontSize}" />
+                    </MenuItem>
+
+                </MenuItem>
+                <MenuItem Header="_Toggles">
+                    <MenuItem Header="_Hitboxes" />
+                    <MenuItem Header="_Simplified Graphics" />
+                </MenuItem>
+            </Menu>
+            <Grid Grid.Row="0" Grid.Column="1" IsHitTestVisible="False"></Grid>
+
+            <views:MainView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" />
+        </Grid>
+
+        <!--
+        <Grid RowDefinitions="Auto,*">
+            <Border Height="30" IsHitTestVisible="False" />
+        </Grid>
+        -->
+
+    </Panel>
+
+</Window>
