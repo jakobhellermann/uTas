@@ -6,7 +6,7 @@ using AvaloniaEdit.Document;
 using AvaloniaEdit.Editing;
 using Key = Avalonia.Input.Key;
 
-namespace TasEditor.Views;
+namespace TasEditor.Views.Editing;
 
 public class FormattingInputHandler : TextAreaStackedInputHandler {
     private const int AlignFrameCountTo = 4;

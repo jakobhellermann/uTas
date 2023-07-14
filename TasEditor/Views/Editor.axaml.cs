@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using Avalonia.Controls;
-using Avalonia.Input;
-using AvaloniaEdit;
-using AvaloniaEdit.Editing;
+﻿using Avalonia.Controls;
 using AvaloniaEdit.TextMate;
+using TasEditor.Views.Editing;
 using TextMateSharp.Grammars;
-using TextMateSharp.Registry;
 
 namespace TasEditor.Views;
 

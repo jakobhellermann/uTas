@@ -8,7 +8,7 @@ using Avalonia.Media.TextFormatting;
 using AvaloniaEdit.Rendering;
 using AvaloniaEdit.Utils;
 
-namespace TasEditor.Views;
+namespace TasEditor.Views.Editing;
 
 public class CurrentFrameBackgroundRenderer : IBackgroundRenderer {
     public int ActiveLineNumber = 1;
