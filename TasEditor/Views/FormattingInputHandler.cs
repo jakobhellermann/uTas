@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Avalonia.Input;
 using AvaloniaEdit;
+using AvaloniaEdit.Document;
 using AvaloniaEdit.Editing;
 using Key = Avalonia.Input.Key;
 
@@ -14,7 +15,8 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
     }
 
     private static bool InterestedInKey(Key key) {
-        return (key is >= Key.A and <= Key.Z or >= Key.D0 and <= Key.D9 or >= Key.NumPad0 and <= Key.NumPad9);
+        return key is >= Key.A and <= Key.Z or >= Key.D0 and <= Key.D9 or >= Key.NumPad0 and <= Key.NumPad9
+            or Key.Enter;
     }
 
     private TextViewPosition _newPosition;
@@ -42,6 +44,10 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
             case >= Key.A and <= Key.Z:
                 handled = OnInputKeyDown((char)('A' + (e.Key - Key.A)), lineText);
                 break;
+            case Key.Enter:
+                OnEnter(line);
+                e.Handled = true;
+                return;
             default:
                 return;
         }
@@ -106,5 +112,12 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
         keys.Sort();
 
         return $"{beforeComma},{string.Join(',', keys)}";
+    }
+
+    private void OnEnter(DocumentLine line) {
+        TextArea.Document.Insert(line.Offset + line.Length + line.DelimiterLength, "\n",
+            AnchorMovementType.AfterInsertion);
+
+        TextArea.Caret.Position = new TextViewPosition(TextArea.Caret.Position.Line + 1, 1);
     }
 }
