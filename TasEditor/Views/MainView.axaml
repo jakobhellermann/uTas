@@ -14,7 +14,8 @@
     <DockPanel>
         <StackPanel Name="StatusBar" Background="#80008080" Height="25" DockPanel.Dock="Bottom"
                     Orientation="Horizontal">
-            <TextBlock Foreground="White" Name="StatusText" Text="Ready" Margin="5 0 0 0" VerticalAlignment="Center"
+            <TextBlock Foreground="White" Name="StatusText" Text="{Binding LastCommOpcode}" Margin="5 0 0 0"
+                       VerticalAlignment="Center"
                        FontSize="12" />
         </StackPanel>
 

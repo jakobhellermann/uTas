@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TasEditor.Desktop", "TasEdi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TasFormat", "TasFormat\TasFormat.csproj", "{225380CF-24A4-4AE3-8703-A6C0EAB54783}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Communication", "Communication\Communication.csproj", "{4263FBD6-5215-4A28-B994-42AF4A9058C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{225380CF-24A4-4AE3-8703-A6C0EAB54783}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{225380CF-24A4-4AE3-8703-A6C0EAB54783}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{225380CF-24A4-4AE3-8703-A6C0EAB54783}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4263FBD6-5215-4A28-B994-42AF4A9058C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4263FBD6-5215-4A28-B994-42AF4A9058C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4263FBD6-5215-4A28-B994-42AF4A9058C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4263FBD6-5215-4A28-B994-42AF4A9058C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
