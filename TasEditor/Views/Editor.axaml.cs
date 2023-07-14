@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 using Avalonia.Controls;
+using Avalonia.Input;
 using AvaloniaEdit;
+using AvaloniaEdit.Editing;
 using AvaloniaEdit.TextMate;
 using TextMateSharp.Grammars;
 using TextMateSharp.Registry;
@@ -10,6 +14,7 @@ namespace TasEditor.Views;
 public partial class Editor : UserControl {
     private CurrentFrameBackgroundRenderer _currentFrameBackgroundRenderer;
 
+
     public Editor() {
         InitializeComponent();
 
@@ -17,6 +22,8 @@ public partial class Editor : UserControl {
         var registryOptions = new RegistryOptions(ThemeName.DarkPlus);
         var textMateInstallation = TextEditor.InstallTextMate(registryOptions);
         textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId("julia"));
+
+        TextEditor.TextArea.PushStackedInputHandler(new FormattingInputHandler(TextEditor.TextArea));
 
         TextEditor.Text = SampleText;
 
