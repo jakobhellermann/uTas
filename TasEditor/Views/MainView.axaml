@@ -12,12 +12,26 @@
     </Design.DataContext>
 
     <DockPanel>
-        <StackPanel Name="StatusBar" Background="#80008080" Height="25" DockPanel.Dock="Bottom"
-                    Orientation="Horizontal">
-            <TextBlock Foreground="White" Name="StatusText" Text="{Binding LastCommOpcode}" Margin="5 0 0 0"
-                       VerticalAlignment="Center"
-                       FontSize="12" />
-        </StackPanel>
+
+        <Border DockPanel.Dock="Bottom" BorderBrush="White" BorderThickness="0 1 0 0">
+            <StackPanel Name="Info" Orientation="Vertical">
+                <TextBlock Background="#00000099" Text="{Binding InfoText}"
+                           FontSize="12"
+                           Padding="6 6 6 6"
+                           FontFamily="Cascadia Code, Consolas, Menlo, Monospace" />
+
+                <StackPanel Name="StatusBar" Background="#80008080" Height="25"
+                            Orientation="Horizontal">
+
+                    <TextBlock Foreground="White" Name="StatusText" Margin="6 0 0 0"
+                               VerticalAlignment="Center"
+                               FontSize="12">
+
+                        <Run Text="{Binding ConnectionState}" />
+                    </TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </Border>
 
         <views:Editor />
     </DockPanel>
