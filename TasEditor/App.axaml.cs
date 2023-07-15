@@ -36,6 +36,7 @@ public partial class App : Application {
         }
 
         _server = new TasCommServer(viewModel);
+        viewModel.TasCommServer = _server;
         _ = Task.Run(async () => await _server.Start(IPAddress.Any, Port));
 
         base.OnFrameworkInitializationCompleted();

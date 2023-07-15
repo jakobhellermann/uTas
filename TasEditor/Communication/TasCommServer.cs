@@ -1,5 +1,9 @@
 using System;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
+using Avalonia.Input;
+using Avalonia.Logging;
 using Communication;
 using TasEditor.ViewModels;
 
@@ -12,15 +16,21 @@ public class TasCommServer : TasCommServerBase {
         _viewModel = viewModel;
     }
 
+    public async ValueTask SendKeybind(TasKeybind keybind) {
+        Console.WriteLine($"Sending keybind {keybind}");
+        var data = new[] { (byte)keybind };
+        await SendToAll((byte)ServerOpCode.KeybindTriggered, data);
+    }
+
     protected override (byte, byte[])? ProcessRequest(byte opcodeByte, byte[] request) {
-        switch ((RequestOpCode)opcodeByte) {
-            case RequestOpCode.EstablishConnection:
+        switch ((ClientOpCode)opcodeByte) {
+            case ClientOpCode.EstablishConnection:
                 _viewModel.ConnectionState = "Connected";
                 break;
-            case RequestOpCode.SetInfoString:
+            case ClientOpCode.SetInfoString:
                 _viewModel.InfoText = Encoding.UTF8.GetString(request);
                 break;
-            case RequestOpCode.CloseConnection:
+            case ClientOpCode.CloseConnection:
                 _viewModel.ConnectionState = "Searching...";
                 _viewModel.InfoText = "";
                 break;
@@ -30,5 +40,12 @@ public class TasCommServer : TasCommServerBase {
         }
 
         return null;
+    }
+
+    protected override void OnClosedConnection(TcpClient client) {
+        if (_viewModel.ConnectionState == "Connected") {
+            _viewModel.ConnectionState = "Searching... (Closed without message)";
+            _viewModel.InfoText = "";
+        }
     }
 }
