@@ -3,15 +3,65 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:avaloniaEdit="https://github.com/avaloniaui/avaloniaedit"
+             xmlns:avalonia="clr-namespace:Avalonia.Themes.Fluent"
              xmlns:viewModels="clr-namespace:TasEditor.ViewModels"
+             xmlns:views="clr-namespace:TasEditor.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="TasEditor.Views.Editor"
              x:DataType="viewModels:MainViewModel">
+    <Design.DataContext>
+        <viewModels:MainViewModel />
+    </Design.DataContext>
+    <UserControl.Resources>
+        <ContextMenu x:Key="EditorContextMenu" Placement="Pointer">
+            <MenuItem Header="Insert/Remove Breakpoint"></MenuItem>
+            <MenuItem Header="_Remove All Breakpoints" HotKey="Ctrl+P" InputGesture="Ctrl+P"
+                      Command="{Binding RemoveAllBreakpoints}" />
+            <Separator />
+            <MenuItem Header="Insert Room Name" HotKey="Ctrl+R" InputGesture="Ctrl+P"></MenuItem>
+            <MenuItem Header="Insert Current In-Game Time" HotKey="Ctrl+T" InputGesture="Ctrl+T" />
+            <MenuItem Header="Insert Command">
+                <MenuItem Header="console load" />
+                <MenuItem Header="Set" />
+                <MenuItem Header="AutoInput" />
+                <MenuItem Header="StunPause" />
+            </MenuItem>
+            <Separator />
+            <MenuItem Header="Open Frame-by-Frame Editor" Click="OpenFrameByFrameEditor" />
+        </ContextMenu>
 
-    <avaloniaEdit:TextEditor
-        Name="TextEditor"
-        FontSize="{Binding FontSize}"
-        ShowLineNumbers="True"
-        FontFamily="Cascadia Code,Consolas,Menlo,Monospace" />
+        <Flyout x:Key="FrameByFrameFlyout" ShowMode="Standard">
+            <views:FrameByFrameEditor />
+        </Flyout>
+    </UserControl.Resources>
+
+    <Grid>
+        <Border
+            ZIndex="1"
+            Background="Transparent"
+            IsVisible="{Binding FrameByFrameEditorOpen}"
+            PointerPressed="CloseFrameByFrameEditor" />
+        <Border
+            Name="FrameByFrameEditorContainer"
+            HorizontalAlignment="Center"
+            Background="{DynamicResource MenuFlyoutPresenterBackground}"
+            CornerRadius="{DynamicResource ControlCornerRadius}"
+            BorderBrush="{DynamicResource MenuFlyoutPresenterBorderBrush}"
+            BorderThickness="{DynamicResource MenuFlyoutPresenterBorderThemeThickness}"
+            Padding="16 12"
+            VerticalAlignment="Top"
+            ZIndex="2"
+            IsVisible="{Binding FrameByFrameEditorOpen}">
+            <ScrollViewer>
+                <views:FrameByFrameEditor Name="FrameByFrameEditor" />
+            </ScrollViewer>
+        </Border>
+
+        <avaloniaEdit:TextEditor
+            Name="TextEditor"
+            FontSize="{Binding FontSize}"
+            ShowLineNumbers="True"
+            FontFamily="Cascadia Code,Consolas,Menlo,Monospace" />
+    </Grid>
 
 </UserControl>

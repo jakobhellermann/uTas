@@ -1,16 +1,24 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using AvaloniaEdit.Editing;
 using AvaloniaEdit.TextMate;
+using TasEditor.ViewModels;
 using TasEditor.Views.Editing;
+using TasFormat;
 using TextMateSharp.Grammars;
 
 namespace TasEditor.Views;
 
 public partial class Editor : UserControl {
-    private CurrentFrameBackgroundRenderer _currentFrameBackgroundRenderer;
-
+    private readonly CurrentFrameBackgroundRenderer _currentFrameBackgroundRenderer;
 
     public Editor() {
         InitializeComponent();
+
+        FrameByFrameEditor.OnChange = OnFrameByFrameEditorChange;
 
 
         var registryOptions = new RegistryOptions(ThemeName.DarkPlus);
@@ -23,6 +31,9 @@ public partial class Editor : UserControl {
 
         _currentFrameBackgroundRenderer = new CurrentFrameBackgroundRenderer();
         TextEditor.TextArea.TextView.BackgroundRenderers.Add(_currentFrameBackgroundRenderer);
+
+        TextEditor.ContextMenu = (ContextMenu)Resources["EditorContextMenu"]!;
+        TextEditor.TextArea.RightClickMovesCaret = true;
 
 
         AddHandler(KeyDownEvent, (o, i) => {
@@ -106,4 +117,59 @@ console load SecretSanta2023/2-Medium/powerav
   13,U,X
   15,L,C
 ";
+
+    private void ExtendSelectionLineBoundaries() {
+        var selection = TextEditor.TextArea.Selection;
+        if (selection.IsEmpty) {
+            var caretLine = TextEditor.TextArea.Caret.Line;
+            var line = TextEditor.Document.GetLineByNumber(caretLine);
+            TextEditor.TextArea.Selection = Selection.Create(TextEditor.TextArea, line.Offset, line.EndOffset);
+        } else {
+            var startLine = Math.Min(selection.StartPosition.Line, selection.EndPosition.Line);
+            var endLine = Math.Max(selection.StartPosition.Line, selection.EndPosition.Line);
+
+            var startOffset = TextEditor.Document.GetLineByNumber(Math.Max(1, startLine)).Offset;
+            var endOffset = TextEditor.Document.GetLineByNumber(Math.Max(1, endLine)).EndOffset;
+
+            TextEditor.TextArea.Selection = Selection.Create(
+                TextEditor.TextArea,
+                startOffset, endOffset
+            );
+        }
+    }
+
+    private void OpenFrameByFrameEditor(object sender, RoutedEventArgs e) {
+        ExtendSelectionLineBoundaries();
+
+        var yPos = TextEditor.TextArea.TextView.GetVisualTopByDocumentLine(
+            TextEditor.TextArea.Selection.StartPosition.Line
+        ) - TextEditor.VerticalOffset;
+
+        FrameByFrameEditorContainer.Margin = new Thickness(0, yPos, 0, 0);
+
+        try {
+            var tasInputs = TasFile.Parse(TextEditor.SelectedText);
+            FrameByFrameEditor.GenerateGrid(tasInputs);
+        } catch (Exception exception) {
+            Console.WriteLine(exception);
+        }
+
+        ((MainViewModel)DataContext!).OpenFrameByFrameEditor();
+
+        /*var flyout = (Flyout)Resources["FrameByFrameFlyout"]!;
+        if (flyout.IsOpen) {
+            flyout.Hide();
+        } else {
+            flyout.ShowAt((Control)this, true);
+        }*/
+    }
+
+
+    private void OnFrameByFrameEditorChange(string tas) {
+        TextEditor.SelectedText = tas;
+    }
+
+    private void CloseFrameByFrameEditor(object? sender, PointerPressedEventArgs e) {
+        ((MainViewModel)DataContext!).CloseFrameByFrameEditor();
+    }
 }

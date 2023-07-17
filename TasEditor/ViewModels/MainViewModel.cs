@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using TasEditor.Communication;
@@ -12,6 +11,8 @@ public partial class MainViewModel : ObservableObject {
     [ObservableProperty] private string _connectionState = "Searching...";
 
     [ObservableProperty] private string _infoText = "";
+
+    [ObservableProperty] private bool _frameByFrameEditorOpen = false;
 
     public void IncreaseFontSize() {
         FontSize += 1;
@@ -46,5 +47,18 @@ public partial class MainViewModel : ObservableObject {
         if (TasCommServer is null) return;
 
         Task.Run(async () => { await TasCommServer.SendKeybind(TasKeybind.ToggleHitboxes); });
+    }
+
+
+    public void RemoveAllBreakpoints() {
+        Console.WriteLine("Removing all breakpoints");
+    }
+
+    public void OpenFrameByFrameEditor() {
+        FrameByFrameEditorOpen = true;
+    }
+
+    public void CloseFrameByFrameEditor() {
+        FrameByFrameEditorOpen = false;
     }
 }

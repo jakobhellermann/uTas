@@ -18,7 +18,7 @@ Set, Player.Speed.X, 100
    6,R,J
 ";
 
-        Parser.Parse(exampleTas);
+        TasFile.Parse(exampleTas);
     }
 
     [Test]
@@ -152,7 +152,51 @@ Read,LoadJournal,0,Any%
         };
 
         foreach (var input in inputs) {
-            Parser.Parse(input);
+            TasFile.Parse(input);
         }
+    }
+
+    [Test]
+    public void Expand() {
+        const string input = "4,R,U,X\n2,R";
+        const string expected = """
+   1,R,U,X
+   1,R,U,X
+   1,R,U,X
+   1,R,U,X
+   1,R
+   1,R
+""";
+        var inputs = TasFile.Parse(input);
+        inputs.Expand();
+        var result = inputs.ToTasFormat();
+
+        Assert.AreEqual(expected, result);
+    }
+
+    [Test]
+    public void ExpandImmutable() {
+        const string input = "2,R";
+        var inputs = TasFile.Parse(input);
+        inputs.Expand();
+        if (inputs.Lines[1].Line is TasLine.FrameInput i) {
+            i.Inputs.Add(new Input("U"));
+        }
+
+        Console.WriteLine(inputs);
+
+        Assert.AreEqual("   1,R\n   1,R,U", inputs.ToTasFormat());
+    }
+
+
+    [Test]
+    public void ExpandCollapseRoundtrip() {
+        const string input = "   4,R,U,X\n   2,R";
+        var inputs = TasFile.Parse(input);
+        inputs.Expand();
+        inputs.Collapse();
+        var result = inputs.ToTasFormat();
+
+        Assert.AreEqual(input, result);
     }
 }
