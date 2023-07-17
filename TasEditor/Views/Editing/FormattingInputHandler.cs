@@ -82,7 +82,9 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
         }
 
         var numberClamped = Math.Min(number, Math.Pow(10, AlignFrameCountTo) - 1);
-        return $"{numberClamped,AlignFrameCountTo},{afterComma}";
+
+        var comma = afterComma.IsEmpty ? "" : ",";
+        return $"{numberClamped,AlignFrameCountTo}{comma}{afterComma}";
     }
 
     private string? OnInputKeyDown(char key, string line) {
