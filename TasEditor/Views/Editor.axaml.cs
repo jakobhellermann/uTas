@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -15,8 +17,13 @@ namespace TasEditor.Views;
 public partial class Editor : UserControl {
     private readonly CurrentFrameBackgroundRenderer _currentFrameBackgroundRenderer;
 
+    private MainViewModel MainViewModel => (MainViewModel)DataContext!;
+
     public Editor() {
         InitializeComponent();
+
+        TextEditor.TextChanged += TextChanged;
+
 
         FrameByFrameEditor.OnChange = OnFrameByFrameEditorChange;
 
@@ -40,6 +47,19 @@ public partial class Editor : UserControl {
             _currentFrameBackgroundRenderer.CurrentFrame += 1;
             _currentFrameBackgroundRenderer.CurrentFrame = 1;
             _currentFrameBackgroundRenderer.ActiveLineNumber += 1;
+        });
+    }
+
+    private void TextChanged(object? sender, EventArgs e) {
+        MainViewModel.EditorTextDirty = true;
+
+        if (MainViewModel.CurrentFilePath is null) return;
+
+        var text = TextEditor.Text;
+        var path = MainViewModel.CurrentFilePath;
+        Task.Run(async () => {
+            await File.WriteAllTextAsync(path, text);
+            MainViewModel.EditorTextDirty = false;
         });
     }
 

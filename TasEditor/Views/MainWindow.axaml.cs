@@ -24,7 +24,10 @@ public partial class MainWindow : Window {
         if (files.Count == 0) return;
         var file = files[0];
 
-        MainViewModel.CurrentFilePath = file.Path;
+        var path = file.TryGetLocalPath();
+        if (path is null) return; // TODO error
+
+        MainViewModel.CurrentFilePath = path;
         MainViewModel.CurrentFileName = file.Name;
         MainViewModel.FrameByFrameEditorOpen = false;
 
@@ -44,11 +47,14 @@ public partial class MainWindow : Window {
 
         if (file is null) return;
 
+        var path = file.TryGetLocalPath();
+        if (path is null) return; // TODO error
+
         await using var stream = await file.OpenWriteAsync();
         await using var writer = new StreamWriter(stream);
         await writer.WriteAsync(MainView.Editor.TextEditor.Text);
 
-        MainViewModel.CurrentFilePath = file.Path;
+        MainViewModel.CurrentFilePath = path;
         MainViewModel.CurrentFileName = file.Name;
     }
 }

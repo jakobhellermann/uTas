@@ -14,9 +14,11 @@ public partial class MainViewModel : ObservableObject {
 
     [ObservableProperty] private bool _frameByFrameEditorOpen;
 
-    public Uri? CurrentFilePath = null;
+    public string? CurrentFilePath = null;
 
     [ObservableProperty] private string? _currentFileName;
+
+    public bool EditorTextDirty = false;
 
     public void IncreaseFontSize() {
         FontSize += 1;
