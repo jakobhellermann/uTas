@@ -8,7 +8,7 @@
         x:Class="TasEditor.Views.MainWindow"
         x:DataType="viewModels:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="uTas"
+        Title="{Binding CurrentFileName}"
 
         ExtendClientAreaToDecorationsHint="True"
         TransparencyLevelHint="AcrylicBlur"
@@ -19,7 +19,6 @@
     <Design.DataContext>
         <viewModels:MainViewModel />
     </Design.DataContext>
-
 
     <Window.KeyBindings>
         <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding IncreaseFontSize}" />
@@ -37,19 +36,19 @@
             <ExperimentalAcrylicBorder.Material>
                 <ExperimentalAcrylicMaterial
                     BackgroundSource="Digger"
-                    TintColor="Black"
+                    TintColor="black"
                     TintOpacity="1"
                     MaterialOpacity="0.7" />
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
 
 
-        <Grid RowDefinitions="Auto,*" ColumnDefinitions="Auto,*">
+        <Grid RowDefinitions="Auto,*" ColumnDefinitions="Auto,*,140">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
-                    <MenuItem Header="_New File" />
-                    <MenuItem Header="_Open File" />
-                    <MenuItem Header="_Save As..." HotKey="Ctrl+Shift+S" />
+                    <MenuItem Header="_New File" HotKey="Ctrl+N" InputGesture="Ctrl+N" />
+                    <MenuItem Header="_Open File" HotKey="Ctrl+O" InputGesture="Ctrl+O" Click="OpenFile" />
+                    <MenuItem Header="_Save As..." HotKey="Ctrl+Shift+S" InputGesture="Ctrl+Shift+S" Click="SaveFileAs" />
                 </MenuItem>
                 <MenuItem Header="_Settings">
 
@@ -64,16 +63,14 @@
                     <MenuItem Header="_Simplified Graphics" />
                 </MenuItem>
             </Menu>
-            <Grid Grid.Row="0" Grid.Column="1" IsHitTestVisible="False"></Grid>
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CurrentFileName}"
+                       VerticalAlignment="Center"
+                       FontWeight="Light" IsHitTestVisible="False" Margin="10 0 0 0"
+                       TextTrimming="CharacterEllipsis" />
+            <Grid Grid.Row="0" Grid.Column="1" ColumnSpan="2" IsHitTestVisible="False" />
 
-            <views:MainView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" />
+            <views:MainView Name="MainView" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" />
         </Grid>
-
-        <!--
-        <Grid RowDefinitions="Auto,*">
-            <Border Height="30" IsHitTestVisible="False" />
-        </Grid>
-        -->
 
     </Panel>
 

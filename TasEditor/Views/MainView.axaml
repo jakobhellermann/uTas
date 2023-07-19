@@ -33,6 +33,6 @@
             </StackPanel>
         </Border>
 
-        <views:Editor />
+        <views:Editor Name="Editor" />
     </DockPanel>
 </UserControl>
