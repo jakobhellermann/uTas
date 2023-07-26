@@ -11,13 +11,13 @@ public abstract class TasCommServerBase : IDisposable {
     private TcpListener? _listener;
     private List<TcpClient> _connectedClients = new();
 
-    public async Task Start(IPAddress address, int port) {
+    public async Task Start(IPAddress address, int port, CancellationToken cancellationToken) {
         _listener = new TcpListener(address, port);
         _listener.Start();
         Console.WriteLine($"Listening for connections on port {port}...");
 
         while (_listener != null) {
-            var client = await _listener.AcceptTcpClientAsync();
+            var client = await _listener.AcceptTcpClientAsync(cancellationToken);
             Console.WriteLine($"Accepted client {client.Client.RemoteEndPoint}");
 
             _ = Task.Run(async () => await HandleClient(client));

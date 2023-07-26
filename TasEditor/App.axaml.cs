@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -24,13 +25,18 @@ public partial class App : Application {
         // Without this line you will get duplicate validations from both Avalonia and CT
         BindingPlugins.DataValidators.RemoveAt(0);
 
+        var cancellationTokenSource = new CancellationTokenSource();
+
         var viewModel = new MainViewModel();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             desktop.MainWindow = new MainWindow {
                 DataContext = viewModel
             };
-            desktop.Exit += (_, _) => { _server.Dispose(); };
+            desktop.Exit += (_, _) => {
+                cancellationTokenSource.Cancel();
+                _server.Dispose();
+            };
         } else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform) {
             singleViewPlatform.MainView = new MainView {
                 DataContext = viewModel
@@ -42,7 +48,8 @@ public partial class App : Application {
             viewModel.TasCommServer = _server;
             _ = Task.Run(async () => {
                 try {
-                    await _server.Start(IPAddress.Any, Port);
+                    await _server.Start(IPAddress.Any, Port, cancellationTokenSource.Token);
+                } catch (OperationCanceledException) {
                 } catch (Exception e) {
                     Console.WriteLine(e);
                     throw;
