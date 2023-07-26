@@ -1,5 +1,10 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+
+// ReSharper disable ReplaceSubstringWithRangeIndexer net472 compat :(
 
 namespace TasFormat;
 
@@ -16,13 +21,14 @@ public interface TasLine {
 
     public record FrameInput(int FrameCount, HashSet<Input> Inputs) : TasLine {
         public override string ToString() {
-            return $"FrameInput {{ FrameCount = {FrameCount}, Inputs = {string.Join(',', Inputs)} }}";
+            return
+                $"FrameInput {{ FrameCount = {FrameCount}, Inputs = {(Inputs.Count == 0 ? "()" : string.Join(", ", Inputs))} }}";
         }
 
         public string ToTasFormat() {
             const int align = 4;
             var comma = Inputs.Count > 0 ? "," : "";
-            return $"{FrameCount,align}{comma}{string.Join(',', Inputs.Select(input => input.Key))}";
+            return $"{FrameCount,align}{comma}{string.Join(",", Inputs.Select(input => input.Key))}";
         }
 
         public virtual bool Equals(FrameInput? other) {
@@ -32,13 +38,15 @@ public interface TasLine {
         }
 
         public override int GetHashCode() {
-            return HashCode.Combine(FrameCount, Inputs);
+            unchecked {
+                return (FrameCount * 397) ^ Inputs.GetHashCode();
+            }
         }
     }
 
     public record Call(string Method, string[] Arguments) : TasLine {
         public override string ToString() {
-            return $"Call {{ Method = {Method}, Arguments = {string.Join(',', Arguments)} }}";
+            return $"Call {{ Method = {Method}, Arguments = {string.Join(",", Arguments)} }}";
         }
 
 
@@ -64,44 +72,45 @@ public record TasLineInfo(TasLine Line, int LineNumber);
 
 public record TasFile(List<TasLineInfo> Lines) {
     public static TasFile Parse(string file) {
-        var lines = file.Split("\n");
+        var lines = file.Split('\n');
 
         var tasLines = new List<TasLineInfo>();
 
         var lineNumber = -1;
-        foreach (var line in lines) {
+        foreach (var l in lines) {
+            var line = l;
+
             lineNumber++;
 
-            var span = line.AsSpan();
-            var commentIndex = span.IndexOf('#');
+            var commentIndex = line.IndexOf('#');
 
             if (commentIndex != -1) {
-                var beforeComment = span[..commentIndex];
-                var afterComment = span[(commentIndex + 1) ..];
+                var beforeComment = line.Substring(0, commentIndex);
+                var afterComment = line.Substring(commentIndex + 1);
 
                 if (beforeComment.Trim().IsWhiteSpace()) {
                     tasLines.Add(new TasLineInfo(new TasLine.Comment(afterComment.ToString()), lineNumber));
                     continue;
                 }
 
-                span = beforeComment;
+                line = beforeComment;
             }
 
-            if (span.IsWhiteSpace()) continue;
+            if (line.IsWhiteSpace()) continue;
 
-            var commaIndex = span.IndexOf(',');
-            var beforeComma = commaIndex == -1 ? span : span[..commaIndex];
-            var afterComma = commaIndex == -1 ? ReadOnlySpan<char>.Empty : span[(commaIndex + 1)..];
+            var commaIndex = line.IndexOf(',');
+            var beforeComma = commaIndex == -1 ? line : line.Substring(0, commaIndex);
+            var afterComma = commaIndex == -1 ? "" : line.Substring(commaIndex + 1);
 
             if (int.TryParse(beforeComma, out var frameCount)) {
                 var inputs = new HashSet<Input>();
-                var inputStrings = afterComma.ToString().Split(",");
+                var inputStrings = afterComma.Split(',');
                 foreach (var inputString in inputStrings) {
-                    var inputStringTrimmed = inputString.AsSpan().Trim();
+                    var inputStringTrimmed = inputString.Trim();
                     if (inputStringTrimmed.IsWhiteSpace()) continue;
 
                     if (Regex.IsMatch(inputStringTrimmed, @"^[a-zA-Z]$")) {
-                        inputs.Add(new Input(inputStringTrimmed.ToString()));
+                        inputs.Add(new Input(inputStringTrimmed));
                     } else {
                         throw new Exception($"unexpected input `{inputStringTrimmed}` in line `{afterComma}`");
                     }
@@ -112,17 +121,17 @@ public record TasFile(List<TasLineInfo> Lines) {
             }
 
 
-            var colonIndex = span.IndexOf(':');
+            var colonIndex = line.IndexOf(':');
             if (colonIndex != -1) {
-                var key = span[..colonIndex].Trim();
-                var value = span[(colonIndex + 1)..].Trim();
-                tasLines.Add(new TasLineInfo(new TasLine.Property(key.ToString(), value.ToString()), lineNumber));
+                var key = line.Substring(0, colonIndex);
+                var value = line.Substring(colonIndex + 1);
+                tasLines.Add(new TasLineInfo(new TasLine.Property(key, value), lineNumber));
                 continue;
             }
 
 
-            var method = beforeComma.ToString();
-            var arguments = afterComma.ToString().Split(',').Select(argument => argument.Trim()).ToArray();
+            var method = beforeComma;
+            var arguments = afterComma.Split(',').Select(argument => argument.Trim()).ToArray();
             tasLines.Add(new TasLineInfo(new TasLine.Call(method, arguments), lineNumber));
         }
 
@@ -132,15 +141,15 @@ public record TasFile(List<TasLineInfo> Lines) {
     public void Expand() {
         for (var i = Lines.Count - 1; i >= 0; i--) {
             var info = Lines[i];
-            if (info.Line is TasLine.FrameInput { FrameCount: > 1 } input) {
-                Lines.RemoveAt(i);
+            if (info.Line is not TasLine.FrameInput { FrameCount: > 1 } input) continue;
 
-                var expanded = Enumerable.Range(0, input.FrameCount).Select(_ => {
-                    var line = new TasLine.FrameInput(1, input.Inputs.Select(inp => new Input(inp.Key)).ToHashSet());
-                    return new TasLineInfo(line, info.LineNumber);
-                });
-                Lines.InsertRange(i, expanded);
-            }
+            Lines.RemoveAt(i);
+
+            var expanded = Enumerable.Range(0, input.FrameCount).Select(_ => {
+                var line = new TasLine.FrameInput(1, input.Inputs.Select(inp => new Input(inp.Key)).ToHashSet());
+                return new TasLineInfo(line, info.LineNumber);
+            });
+            Lines.InsertRange(i, expanded);
         }
     }
 
@@ -219,4 +228,10 @@ public record TasFile(List<TasLineInfo> Lines) {
  
  Value: x
  */
+}
+
+public static class Extensions {
+    public static bool IsWhiteSpace(this string s) {
+        return s.All(k => k is ' ' or '\t');
+    }
 }
