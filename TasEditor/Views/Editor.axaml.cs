@@ -82,7 +82,6 @@ public partial class Editor : UserControl {
         var lineOffset = TextEditor.Document.GetLineByNumber(studioInfo.CurrentLine).Offset;
         TextEditor.Select(lineOffset, 0);
         TextEditor.ScrollToLine(studioInfo.CurrentLine);
-        Console.WriteLine(studioInfo.CurrentLine);
 
         TextEditor.TextArea.TextView.InvalidateMeasure();
     }

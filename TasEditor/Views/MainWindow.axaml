@@ -26,9 +26,9 @@
 
         <KeyBinding Gesture="Ctrl+B" Command="{Binding ToggleHitboxes}" />
 
-        <KeyBinding Gesture="RightCtrl" Command="{Binding StartStop}" />
-        <KeyBinding Gesture="D3" Command="{Binding FrameAdvance}" />
-        <KeyBinding Gesture="OemPlus" Command="{Binding PauseResume}" />
+        <KeyBinding Gesture="OemMinus" Command="{Binding StartStop}" />
+        <KeyBinding Gesture="OemPlus" Command="{Binding FrameAdvance}" />
+        <KeyBinding Gesture="OemPeriod" Command="{Binding PauseResume}" />
     </Window.KeyBindings>
 
     <Panel>
