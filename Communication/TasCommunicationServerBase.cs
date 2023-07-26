@@ -1,10 +1,11 @@
 using System.Buffers.Binary;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
-namespace Communication;
+namespace uTas.Communication;
 
-public abstract class TasCommServerBase : IDisposable {
+public abstract class TasCommunicationServerBase : IDisposable {
     private SemaphoreSlim _sendMutex = new(1);
     private SemaphoreSlim _recvMutex = new(1);
 
@@ -51,17 +52,20 @@ public abstract class TasCommServerBase : IDisposable {
 
     protected async ValueTask SendToAll(byte opcode, byte[] data) {
         Console.WriteLine($"Sending to {_connectedClients.Count} clients");
-        foreach (var client in _connectedClients) {
+        foreach (var client in _connectedClients)
             try {
                 await Send(client.GetStream(), opcode, data);
             } catch (Exception e) {
                 Console.WriteLine($"failed to send to a client, removing from list: {e}");
                 _connectedClients.Remove(client);
             }
-        }
     }
 
-    protected async ValueTask Send(Stream stream, byte opcode, byte[] data) {
+    protected async ValueTask SendToAll(byte opcode, string data) {
+        await SendToAll(opcode, Encoding.UTF8.GetBytes(data));
+    }
+
+    private async ValueTask Send(Stream stream, byte opcode, byte[] data) {
         await _sendMutex.WaitAsync();
 
         try {
@@ -101,9 +105,7 @@ public abstract class TasCommServerBase : IDisposable {
     protected abstract void OnClosedConnection(TcpClient client);
 
     public void Dispose() {
-        foreach (var client in _connectedClients) {
-            client.Dispose();
-        }
+        foreach (var client in _connectedClients) client.Dispose();
 
         _listener?.Stop();
         _listener = null;

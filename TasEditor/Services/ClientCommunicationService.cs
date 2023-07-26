@@ -2,22 +2,28 @@ using System;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using Communication;
 using TasEditor.ViewModels;
+using uTas.Communication;
 
-namespace TasEditor.Communication;
+namespace TasEditor.Services;
 
-public class TasCommServer : TasCommServerBase {
+public class ClientCommunicationService : TasCommunicationServerBase, IClientCommunicationService {
     private readonly MainViewModel _viewModel;
 
-    public TasCommServer(MainViewModel viewModel) {
+    public ClientCommunicationService(MainViewModel viewModel) {
         _viewModel = viewModel;
     }
 
-    public async ValueTask SendKeybind(TasKeybind keybind) {
+
+    public async Task SendKeybind(TasKeybind keybind) {
         Console.WriteLine($"Sending keybind {keybind}");
         var data = new[] { (byte)keybind };
         await SendToAll((byte)ServerOpCode.KeybindTriggered, data);
+    }
+
+    public async Task SendPath(string? path) {
+        Console.WriteLine($"Path is {path ?? "<null>"}");
+        await SendToAll((byte)ServerOpCode.KeybindTriggered, path ?? "");
     }
 
     protected override void ProcessRequest(byte opcodeByte, byte[] request) {

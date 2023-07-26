@@ -8,11 +8,11 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using AvaloniaEdit.Editing;
 using AvaloniaEdit.TextMate;
-using TasEditor.Communication;
 using TasEditor.ViewModels;
 using TasEditor.Views.Editing;
 using TasFormat;
 using TextMateSharp.Grammars;
+using uTas.Communication;
 
 namespace TasEditor.Views;
 

@@ -2,7 +2,8 @@
 using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using TasEditor.Communication;
+using TasEditor.Services;
+using uTas.Communication;
 
 namespace TasEditor.ViewModels;
 
@@ -32,31 +33,22 @@ public partial class MainViewModel : ObservableObject {
         FontSize -= 1;
     }
 
-    public TasCommServer? TasCommServer = null;
-
+    public IClientCommunicationService ClientCommunicationService;
 
     public void StartStop() {
-        if (TasCommServer is null) return;
-
-        Task.Run(async () => { await TasCommServer.SendKeybind(TasKeybind.StartStop); });
+        Task.Run(async () => { await ClientCommunicationService.SendKeybind(TasKeybind.StartStop); });
     }
 
     public void FrameAdvance() {
-        if (TasCommServer is null) return;
-
-        Task.Run(async () => { await TasCommServer.SendKeybind(TasKeybind.FrameAdvance); });
+        Task.Run(async () => { await ClientCommunicationService.SendKeybind(TasKeybind.FrameAdvance); });
     }
 
     public void PauseResume() {
-        if (TasCommServer is null) return;
-
-        Task.Run(async () => { await TasCommServer.SendKeybind(TasKeybind.PauseResume); });
+        Task.Run(async () => { await ClientCommunicationService.SendKeybind(TasKeybind.PauseResume); });
     }
 
     public void ToggleHitboxes() {
-        if (TasCommServer is null) return;
-
-        Task.Run(async () => { await TasCommServer.SendKeybind(TasKeybind.ToggleHitboxes); });
+        Task.Run(async () => { await ClientCommunicationService.SendKeybind(TasKeybind.ToggleHitboxes); });
     }
 
 
@@ -70,5 +62,14 @@ public partial class MainViewModel : ObservableObject {
 
     public void CloseFrameByFrameEditor() {
         FrameByFrameEditorOpen = false;
+    }
+
+
+    public MainViewModel(IClientCommunicationService clientCommunicationService) {
+        ClientCommunicationService = clientCommunicationService;
+    }
+
+    public MainViewModel() {
+        ClientCommunicationService = new DummyClientCommunicationService();
     }
 }

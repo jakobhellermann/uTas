@@ -1,4 +1,4 @@
-﻿namespace TasEditor.Communication;
+﻿namespace uTas.Communication;
 
 public enum ClientOpCode : byte {
     EstablishConnection = 0,
