@@ -6,6 +6,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>false</ImplicitUsings>
         <LangVersion>11</LangVersion>
+        <DebugType>embedded</DebugType>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(Configuration)' == 'Release'">
