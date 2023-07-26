@@ -6,6 +6,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup Condition="'$(Configuration)' == 'Release'">
+        <Compile Remove="Parser.Tests.cs"/>
+    </ItemGroup>
     <ItemGroup Condition="'$(Configuration)' != 'Release'">
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0"/>
         <PackageReference Include="NUnit" Version="3.9.0"/>
