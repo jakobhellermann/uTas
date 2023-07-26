@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -29,6 +30,7 @@ public partial class App : Application {
             desktop.MainWindow = new MainWindow {
                 DataContext = viewModel
             };
+            desktop.Exit += (_, _) => { _server.Dispose(); };
         } else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform) {
             singleViewPlatform.MainView = new MainView {
                 DataContext = viewModel
@@ -37,7 +39,14 @@ public partial class App : Application {
 
         _server = new TasCommServer(viewModel);
         viewModel.TasCommServer = _server;
-        _ = Task.Run(async () => await _server.Start(IPAddress.Any, Port));
+        _ = Task.Run(async () => {
+            try {
+                await _server.Start(IPAddress.Any, Port);
+            } catch (Exception e) {
+                Console.WriteLine(e);
+                throw;
+            }
+        });
 
         base.OnFrameworkInitializationCompleted();
     }

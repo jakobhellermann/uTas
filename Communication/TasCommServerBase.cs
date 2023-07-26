@@ -4,19 +4,20 @@ using System.Net.Sockets;
 
 namespace Communication;
 
-public abstract class TasCommServerBase {
+public abstract class TasCommServerBase : IDisposable {
     private SemaphoreSlim _sendMutex = new(1);
     private SemaphoreSlim _recvMutex = new(1);
 
+    private TcpListener? _listener;
     private List<TcpClient> _connectedClients = new();
 
     public async Task Start(IPAddress address, int port) {
-        var listener = new TcpListener(address, port);
-        listener.Start();
+        _listener = new TcpListener(address, port);
+        _listener.Start();
         Console.WriteLine($"Listening for connections on port {port}...");
 
-        while (true) {
-            var client = await listener.AcceptTcpClientAsync();
+        while (_listener != null) {
+            var client = await _listener.AcceptTcpClientAsync();
             Console.WriteLine($"Accepted client {client.Client.RemoteEndPoint}");
 
             _ = Task.Run(async () => await HandleClient(client));
@@ -32,12 +33,14 @@ public abstract class TasCommServerBase {
         try {
             while (client.Connected) {
                 var (opcode, data) = await Recv(stream);
-                var res = ProcessRequest(opcode, data);
-                if (res is var (responseOpcode, response)) {
-                    await Send(stream, responseOpcode, response);
+                try {
+                    ProcessRequest(opcode, data);
+                } catch (Exception e) {
+                    Console.WriteLine($"Failed to handle request: {e}");
                 }
             }
-        } catch (EndOfStreamException) {
+        } catch (EndOfStreamException e) {
+            Console.WriteLine($"eof {e}");
         } finally {
             _connectedClients.Remove(client);
         }
@@ -58,38 +61,51 @@ public abstract class TasCommServerBase {
         }
     }
 
-    // TODO: hangs if the client doesn't dispose of the connection
-
-    public async ValueTask Send(Stream stream, byte opcode, byte[] data) {
+    protected async ValueTask Send(Stream stream, byte opcode, byte[] data) {
         await _sendMutex.WaitAsync();
 
-        var header = new byte[5] { opcode, 0, 0, 0, 0 };
-        BinaryPrimitives.WriteUInt32BigEndian(header.AsSpan()[1..], (uint)data.Length);
+        try {
+            var header = new byte[5] { opcode, 0, 0, 0, 0 };
+            BinaryPrimitives.WriteUInt32BigEndian(header.AsSpan()[1..], (uint)data.Length);
 
-        await stream.WriteAsync(header);
-        await stream.WriteAsync(data);
-
-        _sendMutex.Release();
+            await stream.WriteAsync(header);
+            await stream.WriteAsync(data);
+        } finally {
+            _sendMutex.Release();
+        }
     }
 
-    public async ValueTask<(byte, byte[])> Recv(Stream stream) {
+    private async ValueTask<(byte, byte[])> Recv(Stream stream) {
         await _recvMutex.WaitAsync();
 
-        var headerBuffer = new byte[5];
-        await stream.ReadExactlyAsync(headerBuffer);
-        var opcode = headerBuffer[0];
+        try {
+            var headerBuffer = new byte[5];
+            await stream.ReadExactlyAsync(headerBuffer);
+            var opcode = headerBuffer[0];
 
-        var length = BinaryPrimitives.ReadUInt32BigEndian(headerBuffer.AsSpan()[1..]);
+            var length = BinaryPrimitives.ReadUInt32BigEndian(headerBuffer.AsSpan()[1..]);
 
-        var buffer = new byte[length];
-        await stream.ReadExactlyAsync(buffer);
+            var buffer = new byte[length];
+            await stream.ReadExactlyAsync(buffer);
 
-        _recvMutex.Release();
 
-        return (opcode, buffer);
+            return (opcode, buffer);
+        } finally {
+            _recvMutex.Release();
+        }
     }
 
 
-    protected abstract (byte, byte[])? ProcessRequest(byte opcodeByte, byte[] request);
+    protected abstract void ProcessRequest(byte opcodeByte, byte[] request);
+
     protected abstract void OnClosedConnection(TcpClient client);
+
+    public void Dispose() {
+        foreach (var client in _connectedClients) {
+            client.Dispose();
+        }
+
+        _listener?.Stop();
+        _listener = null;
+    }
 }

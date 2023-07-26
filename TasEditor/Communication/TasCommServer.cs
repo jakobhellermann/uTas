@@ -2,8 +2,6 @@ using System;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using Avalonia.Input;
-using Avalonia.Logging;
 using Communication;
 using TasEditor.ViewModels;
 
@@ -22,7 +20,7 @@ public class TasCommServer : TasCommServerBase {
         await SendToAll((byte)ServerOpCode.KeybindTriggered, data);
     }
 
-    protected override (byte, byte[])? ProcessRequest(byte opcodeByte, byte[] request) {
+    protected override void ProcessRequest(byte opcodeByte, byte[] request) {
         switch ((ClientOpCode)opcodeByte) {
             case ClientOpCode.EstablishConnection:
                 _viewModel.ConnectionState = "Connected";
@@ -38,8 +36,6 @@ public class TasCommServer : TasCommServerBase {
                 _viewModel.ConnectionState = $"Unexpected opcode {opcodeByte}";
                 break;
         }
-
-        return null;
     }
 
     protected override void OnClosedConnection(TcpClient client) {
