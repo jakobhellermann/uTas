@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using TasEditor.Communication;
@@ -14,11 +15,12 @@ public partial class MainViewModel : ObservableObject {
 
     [ObservableProperty] private bool _frameByFrameEditorOpen;
 
-    public string? CurrentFilePath = null;
+    [ObservableProperty] [NotifyPropertyChangedFor(nameof(CurrentFileName))]
+    private string? _currentFilePath;
 
-    [ObservableProperty] private string? _currentFileName;
+    public string? CurrentFileName => CurrentFilePath == null ? null : Path.GetFileName(CurrentFilePath);
 
-    [ObservableProperty] private StudioInfo? _studioInfo = null;
+    [ObservableProperty] private StudioInfo? _studioInfo;
 
     public bool EditorTextDirty = false;
 

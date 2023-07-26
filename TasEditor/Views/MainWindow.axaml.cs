@@ -28,14 +28,9 @@ public partial class MainWindow : Window {
         if (path is null) return; // TODO error
 
         MainViewModel.CurrentFilePath = path;
-        MainViewModel.CurrentFileName = file.Name;
         MainViewModel.FrameByFrameEditorOpen = false;
 
-        await using var stream = await file.OpenReadAsync();
-        using var reader = new StreamReader(stream);
-        var content = await reader.ReadToEndAsync();
-
-        MainView.Editor.TextEditor.Text = content;
+        App.SettingsService.Save(App.SettingsService.Settings with { CurrentFile = path });
     }
 
     private async void SaveFileAs(object? sender, RoutedEventArgs e) {
@@ -55,6 +50,5 @@ public partial class MainWindow : Window {
         await writer.WriteAsync(MainView.Editor.TextEditor.Text);
 
         MainViewModel.CurrentFilePath = path;
-        MainViewModel.CurrentFileName = file.Name;
     }
 }

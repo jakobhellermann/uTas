@@ -45,11 +45,29 @@ public partial class Editor : UserControl {
         TextEditor.TextArea.RightClickMovesCaret = true;
 
         DataContextChanged += (_, _) => {
+            OnCurrentFilePathChanged(MainViewModel.CurrentFilePath);
+
             MainViewModel.PropertyChanged += (_, e) => {
                 if (e.PropertyName == "StudioInfo")
                     Dispatcher.UIThread.Invoke(() => { OnStudioInfoChanged(MainViewModel.StudioInfo); });
+                else if (e.PropertyName == "CurrentFilePath")
+                    OnCurrentFilePathChanged(MainViewModel.CurrentFilePath);
             };
         };
+    }
+
+    private void OnCurrentFilePathChanged(string? currentFilePath) {
+        if (MainViewModel.CurrentFilePath is not { } path) {
+            TextEditor.Text = "";
+            return;
+        }
+
+        try {
+            var content = File.ReadAllText(path);
+            TextEditor.Text = content;
+        } catch (Exception exception) {
+            Console.WriteLine($"failed to read text: {exception}");
+        }
     }
 
     private void OnStudioInfoChanged(StudioInfo? info) {

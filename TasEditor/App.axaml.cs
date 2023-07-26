@@ -3,18 +3,22 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using TasEditor.Communication;
+using TasEditor.Services;
 using TasEditor.ViewModels;
 using TasEditor.Views;
 
 namespace TasEditor;
 
-public partial class App : Application {
+public class App : Application {
     private const int Port = 34729;
     private TasCommServer _server = null!;
+
+    public static SettingsService SettingsService { get; } = new();
 
     public override void Initialize() {
         AvaloniaXamlLoader.Load(this);
@@ -27,7 +31,10 @@ public partial class App : Application {
 
         var cancellationTokenSource = new CancellationTokenSource();
 
-        var viewModel = new MainViewModel();
+        var settings = SettingsService.Settings;
+        var viewModel = new MainViewModel {
+            CurrentFilePath = settings.CurrentFile
+        };
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             desktop.MainWindow = new MainWindow {
@@ -43,7 +50,7 @@ public partial class App : Application {
             };
         }
 
-        if (!Avalonia.Controls.Design.IsDesignMode) {
+        if (!Design.IsDesignMode) {
             _server = new TasCommServer(viewModel);
             viewModel.TasCommServer = _server;
             _ = Task.Run(async () => {
