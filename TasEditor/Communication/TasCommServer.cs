@@ -28,6 +28,10 @@ public class TasCommServer : TasCommServerBase {
             case ClientOpCode.SetInfoString:
                 _viewModel.InfoText = Encoding.UTF8.GetString(request);
                 break;
+            case ClientOpCode.SetStudioInfo:
+                var info = StudioInfo.FromByteArray(request);
+                _viewModel.StudioInfo = info.CurrentLine == -1 ? null : info;
+                break;
             case ClientOpCode.CloseConnection:
                 _viewModel.ConnectionState = "Searching...";
                 _viewModel.InfoText = "";

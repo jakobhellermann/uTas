@@ -12,7 +12,7 @@ namespace TasEditor.Views.Editing;
 
 public class CurrentFrameBackgroundRenderer : IBackgroundRenderer {
     public int ActiveLineNumber = 1;
-    public int CurrentFrame = 1;
+    public string CurrentFrame = "";
 
     public void Draw(TextView textView, DrawingContext drawingContext) {
         if (ActiveLineNumber == -1) return;
@@ -24,7 +24,7 @@ public class CurrentFrameBackgroundRenderer : IBackgroundRenderer {
         if (line is null) return;
 
         var text = new FormattedText(
-            CurrentFrame.ToString(),
+            CurrentFrame,
             CultureInfo.CurrentCulture,
             FlowDirection.LeftToRight,
             typeface,

@@ -5,8 +5,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using AvaloniaEdit.Editing;
 using AvaloniaEdit.TextMate;
+using TasEditor.Communication;
 using TasEditor.ViewModels;
 using TasEditor.Views.Editing;
 using TasFormat;
@@ -42,12 +44,29 @@ public partial class Editor : UserControl {
         TextEditor.ContextMenu = (ContextMenu)Resources["EditorContextMenu"]!;
         TextEditor.TextArea.RightClickMovesCaret = true;
 
+        DataContextChanged += (_, _) => {
+            MainViewModel.PropertyChanged += (_, e) => {
+                if (e.PropertyName == "StudioInfo")
+                    Dispatcher.UIThread.Invoke(() => { OnStudioInfoChanged(MainViewModel.StudioInfo); });
+            };
+        };
+    }
 
-        AddHandler(KeyDownEvent, (o, i) => {
-            _currentFrameBackgroundRenderer.CurrentFrame += 1;
-            _currentFrameBackgroundRenderer.CurrentFrame = 1;
-            _currentFrameBackgroundRenderer.ActiveLineNumber += 1;
-        });
+    private void OnStudioInfoChanged(StudioInfo? info) {
+        if (info is not { } studioInfo) {
+            _currentFrameBackgroundRenderer.ActiveLineNumber = -1;
+            return;
+        }
+
+        _currentFrameBackgroundRenderer.ActiveLineNumber = studioInfo.CurrentLine;
+        _currentFrameBackgroundRenderer.CurrentFrame = studioInfo.CurrentLineSuffix;
+
+        var lineOffset = TextEditor.Document.GetLineByNumber(studioInfo.CurrentLine).Offset;
+        TextEditor.Select(lineOffset, 0);
+        TextEditor.ScrollToLine(studioInfo.CurrentLine);
+        Console.WriteLine(studioInfo.CurrentLine);
+
+        TextEditor.TextArea.TextView.InvalidateMeasure();
     }
 
     private void TextChanged(object? sender, EventArgs e) {

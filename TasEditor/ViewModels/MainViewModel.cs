@@ -18,6 +18,8 @@ public partial class MainViewModel : ObservableObject {
 
     [ObservableProperty] private string? _currentFileName;
 
+    [ObservableProperty] private StudioInfo? _studioInfo = null;
+
     public bool EditorTextDirty = false;
 
     public void IncreaseFontSize() {
