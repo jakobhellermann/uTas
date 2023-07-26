@@ -76,10 +76,9 @@ public record TasFile(List<TasLineInfo> Lines) {
 
         var tasLines = new List<TasLineInfo>();
 
-        var lineNumber = -1;
+        var lineNumber = 0;
         foreach (var l in lines) {
             var line = l;
-
             lineNumber++;
 
             var commentIndex = line.IndexOf('#');
@@ -89,7 +88,7 @@ public record TasFile(List<TasLineInfo> Lines) {
                 var afterComment = line.Substring(commentIndex + 1);
 
                 if (beforeComment.Trim().IsWhiteSpace()) {
-                    tasLines.Add(new TasLineInfo(new TasLine.Comment(afterComment.ToString()), lineNumber));
+                    tasLines.Add(new TasLineInfo(new TasLine.Comment(afterComment), lineNumber));
                     continue;
                 }
 
@@ -216,6 +215,9 @@ public record TasFile(List<TasLineInfo> Lines) {
         return builder.ToString();
     }
 
+    public override string ToString() {
+        return $"TasFile {{\n    Lines = [\n        {string.Join(",\n        ", Lines)}\n    ] }}";
+    }
 /*
  console a b c
  Set,A,B,C
