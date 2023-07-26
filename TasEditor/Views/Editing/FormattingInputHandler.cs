@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Input;
 using AvaloniaEdit;
@@ -106,10 +107,11 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
         else
             keys.Add(keyString);
 
-        keys.Sort();
+        SortKeys(keys);
 
         return $"{beforeComma},{string.Join(',', keys)}";
     }
+
 
     private bool OnEnter(IDocumentLine documentLine, string line, int column) {
         if (line.Length == 0) return false;
@@ -188,5 +190,24 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
         var lineTrimmed = line.Trim();
         if (lineTrimmed.Length == 0) return countEmpty;
         return lineTrimmed[0] is >= '0' and <= '9' or ',';
+    }
+
+
+    private static readonly string[] SortedKeys = {
+        "L", "R", "U", "D", "J", "X"
+    };
+
+    private static void SortKeys(List<string> keys) {
+        keys.Sort((a, b) => {
+            var indexA = Array.IndexOf(SortedKeys, a);
+            var indexB = Array.IndexOf(SortedKeys, b);
+
+            if (indexA == -1 && indexB != -1) return -1;
+            if (indexA != -1 && indexB == -1) return 1;
+            if (indexA == -1 && indexB == -1) return string.Compare(a, b, StringComparison.Ordinal);
+            if (indexA != -1 && indexB != -1) return indexA.CompareTo(indexB);
+
+            throw new Exception();
+        });
     }
 }
