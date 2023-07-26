@@ -35,7 +35,7 @@ public abstract class TasCommunicationServerBase : IDisposable {
             while (client.Connected) {
                 var (opcode, data) = await Recv(stream);
                 try {
-                    ProcessRequest(opcode, data);
+                    await ProcessRequest(opcode, data);
                 } catch (Exception e) {
                     Console.WriteLine($"Failed to handle request: {e}");
                 }
@@ -100,7 +100,7 @@ public abstract class TasCommunicationServerBase : IDisposable {
     }
 
 
-    protected abstract void ProcessRequest(byte opcodeByte, byte[] request);
+    protected abstract Task ProcessRequest(byte opcodeByte, byte[] request);
 
     protected abstract void OnClosedConnection(TcpClient client);
 

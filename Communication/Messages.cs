@@ -1,15 +1,18 @@
 ﻿namespace uTas.Communication;
 
+// every String is UTF-8, every integer is big endian unless spcified otherwise
+
 public enum ClientOpCode : byte {
     EstablishConnection = 0,
     CloseConnection = 1,
-    SetInfoString = 2, // UTF-8 String
+    SetInfoString = 2, // String
     SetStudioInfo = 3, // StudioInfo
-    SendKeybindings = 4,
+    SendKeybindings = 4
 }
 
 public enum ServerOpCode : byte {
     KeybindTriggered,
+    SendPath // String
 }
 
 public enum TasKeybind : byte {
@@ -17,7 +20,7 @@ public enum TasKeybind : byte {
     FrameAdvance = 1,
     PauseResume = 2,
 
-    ToggleHitboxes = 3,
+    ToggleHitboxes = 3
 }
 
 // ReSharper disable once UnusedMember.Global
@@ -42,7 +45,7 @@ public readonly record struct StudioInfo(
             SaveStateLine,
             TasStates,
             LevelName,
-            ChapterTime,
+            ChapterTime
         });
     }
 

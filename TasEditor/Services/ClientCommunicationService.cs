@@ -23,13 +23,14 @@ public class ClientCommunicationService : TasCommunicationServerBase, IClientCom
 
     public async Task SendPath(string? path) {
         Console.WriteLine($"Path is {path ?? "<null>"}");
-        await SendToAll((byte)ServerOpCode.KeybindTriggered, path ?? "");
+        await SendToAll((byte)ServerOpCode.SendPath, path ?? "");
     }
 
-    protected override void ProcessRequest(byte opcodeByte, byte[] request) {
+    protected override async Task ProcessRequest(byte opcodeByte, byte[] request) {
         switch ((ClientOpCode)opcodeByte) {
             case ClientOpCode.EstablishConnection:
                 _viewModel.ConnectionState = "Connected";
+                await SendPath(_viewModel.CurrentFilePath);
                 break;
             case ClientOpCode.SetInfoString:
                 _viewModel.InfoText = Encoding.UTF8.GetString(request);

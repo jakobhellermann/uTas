@@ -25,6 +25,10 @@ public partial class MainViewModel : ObservableObject {
 
     public bool EditorTextDirty = false;
 
+    partial void OnCurrentFilePathChanged(string? value) {
+        ClientCommunicationService.SendPath(value);
+    }
+
     public void IncreaseFontSize() {
         FontSize += 1;
     }
