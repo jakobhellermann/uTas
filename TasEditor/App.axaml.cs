@@ -37,16 +37,18 @@ public partial class App : Application {
             };
         }
 
-        _server = new TasCommServer(viewModel);
-        viewModel.TasCommServer = _server;
-        _ = Task.Run(async () => {
-            try {
-                await _server.Start(IPAddress.Any, Port);
-            } catch (Exception e) {
-                Console.WriteLine(e);
-                throw;
-            }
-        });
+        if (!Avalonia.Controls.Design.IsDesignMode) {
+            _server = new TasCommServer(viewModel);
+            viewModel.TasCommServer = _server;
+            _ = Task.Run(async () => {
+                try {
+                    await _server.Start(IPAddress.Any, Port);
+                } catch (Exception e) {
+                    Console.WriteLine(e);
+                    throw;
+                }
+            });
+        }
 
         base.OnFrameworkInitializationCompleted();
     }
