@@ -26,7 +26,7 @@ public class ClientCommunicationService : TasCommunicationServerBase, IClientCom
         await SendToAll((byte)ServerOpCode.SendPath, path ?? "");
     }
 
-    protected override async Task ProcessRequest(byte opcodeByte, byte[] request) {
+    protected override async Task<bool> ProcessRequest(byte opcodeByte, byte[] request) {
         switch ((ClientOpCode)opcodeByte) {
             case ClientOpCode.EstablishConnection:
                 _viewModel.ConnectionState = "Connected";
@@ -38,20 +38,21 @@ public class ClientCommunicationService : TasCommunicationServerBase, IClientCom
             case ClientOpCode.SetStudioInfo:
                 var info = StudioInfo.FromByteArray(request);
                 _viewModel.StudioInfo = info.CurrentLine == -1 ? null : info;
+                _viewModel.StudioInfo = info.CurrentLine == -1 ? null : info;
                 break;
             case ClientOpCode.CloseConnection:
-                _viewModel.ConnectionState = "Searching...";
-                _viewModel.InfoText = "";
-                break;
+                return true;
             default:
                 _viewModel.ConnectionState = $"Unexpected opcode {opcodeByte}";
                 break;
         }
+
+        return false;
     }
 
-    protected override void OnClosedConnection(TcpClient client) {
+    protected override void OnClosedConnection(TcpClient client, bool gracefully) {
         if (_viewModel.ConnectionState == "Connected") {
-            _viewModel.ConnectionState = "Searching... (Closed without message)";
+            _viewModel.ConnectionState = gracefully ? "Searching..." : "Searching... (Closed without message)";
             _viewModel.InfoText = "";
         }
     }

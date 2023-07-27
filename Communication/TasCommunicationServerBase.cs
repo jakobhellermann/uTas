@@ -31,23 +31,23 @@ public abstract class TasCommunicationServerBase : IDisposable {
 
         _connectedClients.Add(client);
 
+        var run = true;
         try {
-            while (client.Connected) {
+            while (client.Connected && run) {
                 var (opcode, data) = await Recv(stream);
                 try {
-                    await ProcessRequest(opcode, data);
+                    run = run && !await ProcessRequest(opcode, data);
                 } catch (Exception e) {
                     Console.WriteLine($"Failed to handle request: {e}");
                 }
             }
         } catch (EndOfStreamException e) {
-            Console.WriteLine($"eof {e}");
+            Console.WriteLine($"Got unannounced EOF: {e}");
         } finally {
             _connectedClients.Remove(client);
         }
 
-        OnClosedConnection(cl);
-        Console.WriteLine("Closed connection");
+        OnClosedConnection(cl, !run);
     }
 
     protected async ValueTask SendToAll(byte opcode, byte[] data) {
@@ -100,9 +100,15 @@ public abstract class TasCommunicationServerBase : IDisposable {
     }
 
 
-    protected abstract Task ProcessRequest(byte opcodeByte, byte[] request);
+    /// <summary>
+    ///     Handle the opcode
+    /// </summary>
+    /// <param name="opcodeByte"></param>
+    /// <param name="request"></param>
+    /// <returns>Whether the connection should be closed now</returns>
+    protected abstract Task<bool> ProcessRequest(byte opcodeByte, byte[] request);
 
-    protected abstract void OnClosedConnection(TcpClient client);
+    protected abstract void OnClosedConnection(TcpClient client, bool gracefully);
 
     public void Dispose() {
         foreach (var client in _connectedClients) client.Dispose();
