@@ -23,6 +23,69 @@ public partial record TasFile(List<TasLineInfo> Lines) {
     }
 
 
+    public record FrameCursorState(
+        TasLine.FrameInput Input,
+        TasLine.FrameInput? PreviousInput,
+        List<TasLine> Other,
+        int LineNumber,
+        int FrameInsideLine
+    ) {
+        public (HashSet<Input>, HashSet<Input>) ReleasedPressed() {
+            HashSet<Input> released;
+            if (PreviousInput != null) {
+                released = new HashSet<Input>(PreviousInput.Inputs);
+                released.ExceptWith(Input.Inputs);
+            } else {
+                released = new HashSet<Input>();
+            }
+
+            HashSet<Input> pressed;
+            if (PreviousInput != null) {
+                pressed = new HashSet<Input>(Input.Inputs);
+                pressed.ExceptWith(PreviousInput.Inputs);
+            } else {
+                pressed = new HashSet<Input>(Input.Inputs);
+            }
+
+            return (released, pressed);
+        }
+    }
+
+
+    public FrameCursorState? GetCursorStateAt(int activeFrame) {
+        var framesToSkip = activeFrame;
+
+
+        var other = new List<TasLine>();
+        TasLine.FrameInput? previousInput = null;
+
+        foreach (var line in Lines) {
+            if (line.Line is not TasLine.FrameInput frameInput) {
+                other.Add(line.Line);
+                continue;
+            }
+
+            if (frameInput.FrameCount <= framesToSkip) {
+                framesToSkip -= frameInput.FrameCount;
+                other.Clear();
+                previousInput = frameInput;
+                continue;
+            }
+
+            var frameInsideLine = framesToSkip;
+
+            return new FrameCursorState(
+                frameInput,
+                previousInput,
+                frameInsideLine == 0 ? other : new List<TasLine>(),
+                line.LineNumber,
+                frameInsideLine
+            );
+        }
+
+        return null;
+    }
+
     public void Expand() {
         for (var i = Lines.Count - 1; i >= 0; i--) {
             var info = Lines[i];
@@ -31,7 +94,8 @@ public partial record TasFile(List<TasLineInfo> Lines) {
             Lines.RemoveAt(i);
 
             var expanded = Enumerable.Range(0, input.FrameCount).Select(_ => {
-                var line = new TasLine.FrameInput(1, input.Inputs.Select(inp => new Input(inp.Key)).ToHashSet());
+                var line = new TasLine.FrameInput(1,
+                    input.Inputs.Select(inp => new Input(inp.Key)).ToHashSet());
                 return new TasLineInfo(line, info.LineNumber);
             });
             Lines.InsertRange(i, expanded);

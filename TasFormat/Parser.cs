@@ -51,7 +51,9 @@ public partial record TasFile {
                         throw new Exception($"unexpected input `{inputStringTrimmed}` in line `{afterComma}`");
                 }
 
-                tasLines.Add(new TasLineInfo(new TasLine.FrameInput(frameCount, inputs), lineNumber));
+                tasLines.Add(
+                    new TasLineInfo(new TasLine.FrameInput(frameCount, inputs), lineNumber)
+                );
                 continue;
             }
 
