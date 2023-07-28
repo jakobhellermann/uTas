@@ -34,6 +34,15 @@ public partial record TasFile {
 
             if (line.IsWhiteSpace()) continue;
 
+            var lineTrimmed = line.TrimStart();
+            if (lineTrimmed.StartsWith("***")) {
+                var afterBreakpoint = line.Substring(3).TrimStart();
+                var couldParse = float.TryParse(afterBreakpoint, out var factor);
+                tasLines.Add(new TasLineInfo(new TasLine.Breakpoint(couldParse ? factor : null), lineNumber));
+
+                continue;
+            }
+
             var commaIndex = line.IndexOf(',');
             var beforeComma = commaIndex == -1 ? line : line.Substring(0, commaIndex);
             var afterComma = commaIndex == -1 ? "" : line.Substring(commaIndex + 1);

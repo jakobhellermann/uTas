@@ -23,6 +23,10 @@ public interface TasLine {
         public string ToTasFormat() => $"#{Text}";
     }
 
+    public record Breakpoint(float? Factor) : TasLine {
+        public string ToTasFormat() => $"***{(Factor != null ? $",{Factor}" : "")}";
+    }
+
     public record FrameInput(int FrameCount, HashSet<Input> Inputs) : TasLine {
         public override string ToString() =>
             $"FrameInput {{ FrameCount = {FrameCount}, Inputs = {(Inputs.Count == 0 ? "()" : string.Join(", ", Inputs))} }}";

@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 
 namespace TasFormat;
@@ -11,14 +12,18 @@ console load 1
 
 Set, Player.Speed.X, 100
 
+*** this is ignored
 #Start
   88
 #lvl_1
    5,R,X
+***
    6,R,J
+***0.5
 ";
 
-        TasFile.Parse(exampleTas);
+        var file = TasFile.Parse(exampleTas);
+        Console.WriteLine(file);
     }
 
     [Test]
