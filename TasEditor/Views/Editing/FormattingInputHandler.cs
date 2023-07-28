@@ -122,6 +122,10 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
         return $"{beforeComma},{string.Join(',', keys)}";
     }
 
+    private void RemoveLine(ISegment line) {
+        TextArea.Document.Replace(line.Offset, line.Length, "");
+    }
+
     private void InsertLine(IDocumentLine line, bool before = false) {
         var offset = before ? line.Offset - line.DelimiterLength : line.Offset + line.Length + line.DelimiterLength;
         TextArea.Document.Insert(offset, "\n");
@@ -155,20 +159,21 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
 
         if (columnIndex < commaIndex + 1) {
             if (onChar == ' ') {
-                if (columnIndex == 0 && !IsFrameInputLine(GetText(documentLine.PreviousLine))) return false;
-
-                var position = TextArea.Caret.Position;
-                TextArea.Caret.Position = position with {
-                    Line = position.Line - 1, Column = documentLine.PreviousLine.Length + 1
-                };
+                RemoveLine(documentLine);
                 return true;
             } else {
+                if (!int.TryParse(beforeComma, out var numberBefore)) return false;
+
                 var withRemovedDigit = beforeComma.ToString().Remove(columnIndex - 1, 1);
 
                 string newLine;
                 var comma = afterComma.IsEmpty ? "" : ",";
-                if (withRemovedDigit.Trim().Length == 0) {
-                    newLine = $"{new string(' ', AlignFrameCountTo)}{comma}{afterComma}";
+
+                if (numberBefore == 0) {
+                    RemoveLine(documentLine);
+                    return true;
+                } else if (withRemovedDigit.Trim().Length == 0) {
+                    newLine = $"{new string(' ', AlignFrameCountTo - 1)}0{comma}{afterComma}";
                 } else {
                     if (!int.TryParse(withRemovedDigit, out var number)) return false;
                     var numberClamped = Math.Min(number, Math.Pow(10, AlignFrameCountTo) - 1);
