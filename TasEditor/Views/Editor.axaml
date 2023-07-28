@@ -12,26 +12,7 @@
         <viewModels:MainViewModel />
     </Design.DataContext>
     <UserControl.Resources>
-        <ContextMenu x:Key="EditorContextMenu" Placement="Pointer">
-            <MenuItem Header="Insert/Remove Breakpoint"></MenuItem>
-            <MenuItem Header="_Remove All Breakpoints" HotKey="Ctrl+P" InputGesture="Ctrl+P"
-                      Command="{Binding RemoveAllBreakpoints}" />
-            <Separator />
-            <MenuItem Header="Insert Room Name" HotKey="Ctrl+R" InputGesture="Ctrl+P"></MenuItem>
-            <MenuItem Header="Insert Current In-Game Time" HotKey="Ctrl+T" InputGesture="Ctrl+T" />
-            <MenuItem Header="Insert Command">
-                <MenuItem Header="console load" />
-                <MenuItem Header="Set" />
-                <MenuItem Header="AutoInput" />
-                <MenuItem Header="StunPause" />
-            </MenuItem>
-            <Separator />
-            <MenuItem Header="Open Frame-by-Frame Editor" Click="OpenFrameByFrameEditor" />
-        </ContextMenu>
 
-        <Flyout x:Key="FrameByFrameFlyout" ShowMode="Standard">
-            <views:FrameByFrameEditor />
-        </Flyout>
     </UserControl.Resources>
 
     <Grid>
@@ -60,6 +41,7 @@
             Name="TextEditor"
             FontSize="{Binding FontSize}"
             ShowLineNumbers="True"
+            TabIndex="0"
             FontFamily="Cascadia Code,Consolas,Menlo,Monospace" />
     </Grid>
 
