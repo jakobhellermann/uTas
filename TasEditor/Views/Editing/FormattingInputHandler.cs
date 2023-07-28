@@ -23,7 +23,9 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
     private string GetText(ISegment line) => TextArea.Document.GetText(line.Offset, line.Length);
 
     public override void OnPreviewKeyDown(KeyEventArgs e) {
-        if (e.KeyModifiers != KeyModifiers.None) return;
+        var isShift = (e.KeyModifiers & KeyModifiers.Shift) != 0;
+
+        if (e.KeyModifiers != KeyModifiers.None && !(isShift && e.Key == Key.Enter)) return;
         if (!InterestedInKey(e.Key)) return;
 
         var selection = TextArea.Selection;
@@ -46,7 +48,7 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
                 handled = OnInputKeyDown((char)('A' + (e.Key - Key.A)), lineText);
                 break;
             case Key.Enter:
-                e.Handled = OnEnter(line, lineText, position.Column);
+                e.Handled = OnEnter(line, lineText, position.Column, isShift);
                 return;
             case Key.Back:
                 e.Handled = OnBackspace(line, lineText, position.Column);
@@ -112,23 +114,23 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
         return $"{beforeComma},{string.Join(',', keys)}";
     }
 
+    private void InsertLine(IDocumentLine line, bool before = false) {
+        var offset = before ? line.Offset - line.DelimiterLength : line.Offset + line.Length + line.DelimiterLength;
+        TextArea.Document.Insert(offset, "\n");
+        TextArea.Caret.Position = new TextViewPosition(TextArea.Caret.Position.Line + (before ? -1 : 1), 1);
+    }
 
-    private bool OnEnter(IDocumentLine documentLine, string line, int column) {
-        if (line.Length == 0) return false;
-        if (column == 1) {
-            TextArea.Document.Insert(documentLine.Offset - documentLine.DelimiterLength, "\n",
-                AnchorMovementType.BeforeInsertion);
+    private bool OnEnter(IDocumentLine documentLine, string line, int column, bool isShift) {
+        if (isShift) {
+            InsertLine(documentLine, true);
+            return true;
+        } else {
+            var isFrameInputLine = IsFrameInputLine(line);
+            if (!isFrameInputLine) return false;
+
+            InsertLine(documentLine);
             return true;
         }
-
-        var isFrameInputLine = IsFrameInputLine(line);
-        if (!isFrameInputLine) return false;
-
-        TextArea.Document.Insert(documentLine.Offset + documentLine.Length + documentLine.DelimiterLength, "\n",
-            AnchorMovementType.AfterInsertion);
-
-        TextArea.Caret.Position = new TextViewPosition(TextArea.Caret.Position.Line + 1, 1);
-        return true;
     }
 
     private bool OnBackspace(IDocumentLine documentLine, string line, int column) {
