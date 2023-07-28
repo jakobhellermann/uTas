@@ -129,7 +129,7 @@ public partial class FrameByFrameEditor : UserControl {
         }
 
 
-        _tasInputs.Collapse();
+        _tasInputs.Combine();
         OnChange(_tasInputs.ToTasFormat());
         _tasInputs.Expand();
     }

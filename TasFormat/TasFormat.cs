@@ -102,49 +102,45 @@ public partial record TasFile(List<TasLineInfo> Lines) {
         }
     }
 
-    public void Collapse() {
+    public void Combine() {
         if (Lines.Count == 0) return;
 
         var newLines = new List<TasLineInfo>();
 
-        var current = Lines[0].Line;
-        var counter = 1;
+        TasLine.FrameInput? current = null;
+        var frameCount = 0;
+        var currentLineNumber = 0;
 
-        void Flush(TasLine? newLine) {
-            if (current is TasLine.FrameInput input) {
-                newLines.Add(new TasLineInfo(input with { FrameCount = counter }, 0));
-            } else {
-                if (counter != 1) throw new Exception();
-                newLines.Add(new TasLineInfo(current, 0));
+        void Flush(TasLine newLine, int lineNumber) {
+            if (current != null) {
+                newLines.Add(new TasLineInfo(current with { FrameCount = frameCount }, currentLineNumber));
+                current = null;
+                currentLineNumber = lineNumber;
             }
 
-            current = newLine;
-            counter = 1;
+            if (newLine is TasLine.FrameInput inputLine) {
+                current = inputLine;
+                frameCount = inputLine.FrameCount;
+            } else {
+                newLines.Add(new TasLineInfo(newLine, lineNumber));
+            }
         }
 
-        for (var index = 1; index < Lines.Count; index++) {
-            var line = Lines[index];
-
+        foreach (var line in Lines)
             if (line.Line is TasLine.FrameInput input) {
-                if (current is not TasLine.FrameInput currentInput) {
-                    Flush(input);
-                    continue;
+                if (current is null) {
+                    current = input;
+                    frameCount = input.FrameCount;
+                } else if (input.Inputs.SetEquals(current.Inputs)) {
+                    frameCount += input.FrameCount;
+                } else {
+                    Flush(input, line.LineNumber);
                 }
-
-                if (input != currentInput) {
-                    Flush(input);
-                    continue;
-                }
-
-                counter += 1;
             } else {
-                Flush(line.Line);
+                Flush(line.Line, line.LineNumber);
             }
 
-            if (line.Line == current) counter += 1;
-        }
-
-        Flush(null);
+        if (current != null) newLines.Add(new TasLineInfo(current with { FrameCount = frameCount }, currentLineNumber));
 
         Lines.Clear();
         Lines.AddRange(newLines);

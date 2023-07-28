@@ -11,6 +11,7 @@
 
     <ItemGroup Condition="'$(Configuration)' == 'Release'">
         <Compile Remove="Parser.Tests.cs" />
+        <Compile Remove="TasFormat.Tests.cs" />
     </ItemGroup>
     <ItemGroup Condition="'$(Configuration)' != 'Release'">
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
