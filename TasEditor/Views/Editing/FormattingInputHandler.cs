@@ -17,7 +17,7 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
 
     private static bool InterestedInKey(Key key) =>
         key is >= Key.A and <= Key.Z or >= Key.D0 and <= Key.D9 or >= Key.NumPad0 and <= Key.NumPad9
-            or Key.Enter or Key.Back;
+            or Key.Enter or Key.Back or Key.Space;
 
     private TextViewPosition _newPosition;
 
@@ -53,6 +53,9 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
                 return;
             case Key.Back:
                 e.Handled = OnBackspace(line, lineText, position.Column);
+                break;
+            case Key.Space:
+                e.Handled = OnSpace(line, lineText, position.Column);
                 break;
         }
 
@@ -191,6 +194,17 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
         } else {
             return OnBackspace(documentLine, line, column - 1);
         }
+    }
+
+
+    private bool OnSpace(IDocumentLine documentLine, string line, int column) {
+        if (!IsFrameInputLine(line)) return false;
+
+        var commaIndex = line.IndexOf(',');
+        var newColumnIndex = commaIndex == -1 ? line.Length : commaIndex;
+
+        TextArea.Caret.Column = newColumnIndex + 1;
+        return true;
     }
 
     private bool IsFrameInputLine(ReadOnlySpan<char> line, bool countEmpty = false) {
