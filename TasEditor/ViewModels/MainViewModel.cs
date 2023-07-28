@@ -21,11 +21,14 @@ public partial class MainViewModel : ObservableObject {
 
     public string? CurrentFileName => CurrentFilePath == null ? null : Path.GetFileName(CurrentFilePath);
 
+    public string? OldFilePath { get; private set; }
+
     [ObservableProperty] private StudioInfo? _studioInfo;
 
     public bool EditorTextDirty = false;
 
-    partial void OnCurrentFilePathChanged(string? value) {
+    partial void OnCurrentFilePathChanging(string? value) {
+        OldFilePath = CurrentFilePath;
         ClientCommunicationService.SendPath(value);
     }
 
@@ -36,6 +39,11 @@ public partial class MainViewModel : ObservableObject {
     public void DecreaseFontSize() {
         FontSize -= 1;
     }
+
+    public void OpenLastFile() {
+        if (OldFilePath is not null) CurrentFilePath = OldFilePath;
+    }
+
 
     public IClientCommunicationService ClientCommunicationService;
 

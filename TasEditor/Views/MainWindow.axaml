@@ -23,6 +23,8 @@
     <Window.KeyBindings>
         <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding IncreaseFontSize}" />
         <KeyBinding Gesture="Ctrl+OemMinus" Command="{Binding DecreaseFontSize}" />
+        <KeyBinding Gesture="Alt+Left" Command="{Binding OpenLastFile}" />
+        <KeyBinding Gesture="Alt+Right" Command="{Binding OpenLastFile}" />
 
         <KeyBinding Gesture="Ctrl+B" Command="{Binding ToggleHitboxes}" />
 
