@@ -10,6 +10,7 @@ namespace TasEditor.Views.Editing;
 
 public class FormattingInputHandler : TextAreaStackedInputHandler {
     private const int AlignFrameCountTo = 4;
+    private const bool RemoveExclusiveActions = true;
 
     public FormattingInputHandler(TextArea textArea) : base(textArea) {
     }
@@ -104,10 +105,14 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
 
         var keys = afterComma
             .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
-        if (keys.Contains(keyString))
+        if (keys.Contains(keyString)) {
             keys.Remove(keyString);
-        else
+        } else {
             keys.Add(keyString);
+
+            if (RemoveExclusiveActions && ExclusiveActions.TryGetValue(keyString, out var excludes))
+                keys.RemoveAll(k => excludes.Contains(k));
+        }
 
         SortKeys(keys);
 
@@ -197,6 +202,13 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
 
     private static readonly string[] SortedKeys = {
         "L", "R", "U", "D", "J", "X"
+    };
+
+    private static readonly Dictionary<string, string[]> ExclusiveActions = new() {
+        { "L", new[] { "R" } },
+        { "R", new[] { "L" } },
+        { "U", new[] { "D" } },
+        { "D", new[] { "U" } }
     };
 
     private static void SortKeys(List<string> keys) {
