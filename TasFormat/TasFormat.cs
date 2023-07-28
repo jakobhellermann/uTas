@@ -102,9 +102,10 @@ public partial record TasFile(List<TasLineInfo> Lines) {
         }
     }
 
-    public void Combine() {
-        if (Lines.Count == 0) return;
+    public bool Combine() {
+        if (Lines.Count == 0) return false;
 
+        var changed = false;
         var newLines = new List<TasLineInfo>();
 
         TasLine.FrameInput? current = null;
@@ -133,6 +134,7 @@ public partial record TasFile(List<TasLineInfo> Lines) {
                     frameCount = input.FrameCount;
                 } else if (input.Inputs.SetEquals(current.Inputs)) {
                     frameCount += input.FrameCount;
+                    changed = true;
                 } else {
                     Flush(input, line.LineNumber);
                 }
@@ -144,5 +146,7 @@ public partial record TasFile(List<TasLineInfo> Lines) {
 
         Lines.Clear();
         Lines.AddRange(newLines);
+
+        return changed;
     }
 }

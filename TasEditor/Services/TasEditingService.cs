@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Immutable;
 using AvaloniaEdit.Document;
 using AvaloniaEdit.Editing;
+using TasFormat;
 
 namespace TasEditor.Services;
 
@@ -66,12 +66,48 @@ public class TasEditingService : ITasEditingService {
             if (lineTrimmed.IsWhiteSpace()) continue;
             LineSetComment(line, text, !anyHasComment);
         }
+
         TextArea.Document.EndUpdate();
-        
+
         ExtendSelectionLineBoundaries();
     }
 
     public void CombineConsecutiveInputs() {
+        if (TextArea.Selection.Length == 0) {
+            var caretLine = TextArea.Caret.Line;
+
+            while (true)
+                if (!CombineLines(Math.Max(caretLine - 1, 1), Math.Min(caretLine + 1, TextArea.Document.LineCount)))
+                    break;
+        } else {
+            CombineLines(SelectionStartLine, SelectionEndLine);
+        }
+    }
+
+    private bool CombineLines(int startLine, int endLine) {
+        var startDocumentLine = TextArea.Document.GetLineByNumber(startLine);
+        var endDocumentLine = TextArea.Document.GetLineByNumber(endLine);
+        var length = endDocumentLine.EndOffset - startDocumentLine.Offset;
+
+        var text = TextArea.Document.GetText(startDocumentLine.Offset, length);
+
+        while (text.StartsWith("\n")) {
+            startDocumentLine = startDocumentLine.NextLine;
+            length = endDocumentLine.EndOffset - startDocumentLine.Offset;
+            text = TextArea.Document.GetText(startDocumentLine.Offset, length);
+        }
+
+
+        var file = TasFile.Parse(text);
+        var changed = file.Combine();
+
+        if (changed) {
+            var combined = file.ToTasFormat();
+            TextArea.Document.Replace(startDocumentLine.Offset, length, combined,
+                OffsetChangeMappingType.Normal);
+        }
+
+        return changed;
     }
 
     private void LineToggleComment(ISegment line, ReadOnlySpan<char> lineText) {
