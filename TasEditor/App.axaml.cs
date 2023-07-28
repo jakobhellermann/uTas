@@ -18,6 +18,7 @@ public class App : Application {
     private IClientCommunicationService _clientCommunicationService = null!;
 
     public static SettingsService SettingsService { get; } = new();
+    public static ITasEditingService TasEditingService { get; } = new TasEditingService();
 
     public override void Initialize() {
         AvaloniaXamlLoader.Load(this);
@@ -31,7 +32,7 @@ public class App : Application {
         var cancellationTokenSource = new CancellationTokenSource();
 
         var settings = SettingsService.Settings;
-        var viewModel = new MainViewModel(new DummyClientCommunicationService()) {
+        var viewModel = new MainViewModel(new DummyClientCommunicationService(), TasEditingService) {
             CurrentFilePath = settings.CurrentFile
         };
 

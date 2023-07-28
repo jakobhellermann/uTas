@@ -8,6 +8,7 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using AvaloniaEdit.Editing;
 using AvaloniaEdit.TextMate;
+using TasEditor.Services;
 using TasEditor.ViewModels;
 using TasEditor.Views.Editing;
 using TasFormat;
@@ -20,12 +21,15 @@ public partial class Editor : UserControl {
     private readonly CurrentFrameBackgroundRenderer _currentFrameBackgroundRenderer;
 
     private MainViewModel MainViewModel => (MainViewModel)DataContext!;
+    private ITasEditingService TasEditingService => App.TasEditingService;
 
     public Editor() {
         InitializeComponent();
 
         TextEditor.TextChanged += TextChanged;
 
+        // TODO: make this not suck
+        ((TasEditingService)App.TasEditingService).TextArea = TextEditor.TextArea;
 
         FrameByFrameEditor.OnChange = OnFrameByFrameEditorChange;
 
@@ -105,28 +109,9 @@ public partial class Editor : UserControl {
         });
     }
 
-    private void ExtendSelectionLineBoundaries() {
-        var selection = TextEditor.TextArea.Selection;
-        if (selection.IsEmpty) {
-            var caretLine = TextEditor.TextArea.Caret.Line;
-            var line = TextEditor.Document.GetLineByNumber(caretLine);
-            TextEditor.TextArea.Selection = Selection.Create(TextEditor.TextArea, line.Offset, line.EndOffset);
-        } else {
-            var startLine = Math.Min(selection.StartPosition.Line, selection.EndPosition.Line);
-            var endLine = Math.Max(selection.StartPosition.Line, selection.EndPosition.Line);
-
-            var startOffset = TextEditor.Document.GetLineByNumber(Math.Max(1, startLine)).Offset;
-            var endOffset = TextEditor.Document.GetLineByNumber(Math.Max(1, endLine)).EndOffset;
-
-            TextEditor.TextArea.Selection = Selection.Create(
-                TextEditor.TextArea,
-                startOffset, endOffset
-            );
-        }
-    }
 
     private void OpenFrameByFrameEditor(object sender, RoutedEventArgs e) {
-        ExtendSelectionLineBoundaries();
+        TasEditingService.ExtendSelectionLineBoundaries();
 
         var yPos = TextEditor.TextArea.TextView.GetVisualTopByDocumentLine(
             TextEditor.TextArea.Selection.StartPosition.Line
@@ -141,7 +126,7 @@ public partial class Editor : UserControl {
             Console.WriteLine(exception);
         }
 
-        ((MainViewModel)DataContext!).OpenFrameByFrameEditor();
+        MainViewModel.OpenFrameByFrameEditor();
 
         /*var flyout = (Flyout)Resources["FrameByFrameFlyout"]!;
         if (flyout.IsOpen) {
@@ -157,6 +142,6 @@ public partial class Editor : UserControl {
     }
 
     private void CloseFrameByFrameEditor(object? sender, PointerPressedEventArgs e) {
-        ((MainViewModel)DataContext!).CloseFrameByFrameEditor();
+        MainViewModel.CloseFrameByFrameEditor();
     }
 }

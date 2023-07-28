@@ -9,27 +9,27 @@
 
 
     <ItemGroup>
-        <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)"/>
-        <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.0.0"/>
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)"/>
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)"/>
-        <PackageReference Include="AvaloniaEdit.TextMate" Version="11.0.0"/>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0"/>
+        <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.0.0" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="AvaloniaEdit.TextMate" Version="11.0.0" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0" />
 
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)"/>
-        <PackageReference Include="Semi.Avalonia" Version="11.0.0"/>
-        <PackageReference Include="TextMateSharp.Grammars" Version="1.0.55"/>
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="Semi.Avalonia" Version="11.0.0" />
+        <PackageReference Include="TextMateSharp.Grammars" Version="1.0.55" />
     </ItemGroup>
 
 
     <ItemGroup>
-        <ProjectReference Include="..\Communication\Communication.csproj"/>
-        <ProjectReference Include="..\TasFormat\TasFormat.csproj"/>
+        <ProjectReference Include="..\Communication\Communication.csproj" />
+        <ProjectReference Include="..\TasFormat\TasFormat.csproj" />
     </ItemGroup>
 
     <ItemGroup>

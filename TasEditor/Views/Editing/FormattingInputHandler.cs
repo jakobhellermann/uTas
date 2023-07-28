@@ -166,9 +166,9 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
 
                 var withRemovedDigit = beforeComma.ToString().Remove(columnIndex - 1, 1);
 
-                string newLine;
                 var comma = afterComma.IsEmpty ? "" : ",";
 
+                string newLine;
                 if (numberBefore == 0) {
                     RemoveLine(documentLine);
                     return true;

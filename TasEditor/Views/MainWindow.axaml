@@ -26,6 +26,11 @@
         <KeyBinding Gesture="Alt+Left" Command="{Binding OpenLastFile}" />
         <KeyBinding Gesture="Alt+Right" Command="{Binding OpenLastFile}" />
 
+        <KeyBinding Gesture="Ctrl+K" Command="{Binding ToggleCommentLineByLine}" />
+        <KeyBinding Gesture="Ctrl+Shift+K" Command="{Binding ToggleComment}" />
+
+        <KeyBinding Gesture="Ctrl+L" Command="{Binding CombineConsecutiveInputs}" />
+
         <KeyBinding Gesture="Ctrl+B" Command="{Binding ToggleHitboxes}" />
 
         <KeyBinding Gesture="OemMinus" Command="{Binding StartStop}" />
