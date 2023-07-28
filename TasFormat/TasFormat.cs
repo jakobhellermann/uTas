@@ -28,7 +28,8 @@ public partial record TasFile(List<TasLineInfo> Lines) {
         TasLine.FrameInput? PreviousInput,
         List<TasLine> Other,
         int LineNumber,
-        int FrameInsideLine
+        int FrameInsideLine,
+        int TasFileLineIndex
     ) {
         public (HashSet<Input>, HashSet<Input>) ReleasedPressed() {
             HashSet<Input> released;
@@ -59,7 +60,8 @@ public partial record TasFile(List<TasLineInfo> Lines) {
         var other = new List<TasLine>();
         TasLine.FrameInput? previousInput = null;
 
-        foreach (var line in Lines) {
+        for (var i = 0; i < Lines.Count; i++) {
+            var line = Lines[i];
             if (line.Line is not TasLine.FrameInput frameInput) {
                 other.Add(line.Line);
                 continue;
@@ -79,7 +81,8 @@ public partial record TasFile(List<TasLineInfo> Lines) {
                 previousInput,
                 frameInsideLine == 0 ? other : new List<TasLine>(),
                 line.LineNumber,
-                frameInsideLine
+                frameInsideLine,
+                i
             );
         }
 
