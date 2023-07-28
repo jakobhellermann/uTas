@@ -73,14 +73,20 @@ public partial class Editor : UserControl {
     private void OnStudioInfoChanged(StudioInfo? info) {
         if (info is not { } studioInfo) {
             _currentFrameBackgroundRenderer.ActiveLineNumber = -1;
+            TextEditor.TextArea.TextView.InvalidateMeasure();
             return;
         }
 
         _currentFrameBackgroundRenderer.ActiveLineNumber = studioInfo.CurrentLine;
         _currentFrameBackgroundRenderer.CurrentFrame = studioInfo.CurrentLineSuffix;
 
-        var lineOffset = TextEditor.Document.GetLineByNumber(studioInfo.CurrentLine).Offset;
-        TextEditor.Select(lineOffset, 0);
+        var line = TextEditor.Document.GetLineByNumber(studioInfo.CurrentLine);
+        var text = TextEditor.Document.GetText(line.Offset, line.Length);
+        var lineOffset = line.Offset;
+        var commaIndex = text.IndexOf(',');
+        var columnIndex = commaIndex == -1 ? line.Length - 1 : commaIndex;
+
+        TextEditor.Select(lineOffset + columnIndex, 0);
         TextEditor.ScrollToLine(studioInfo.CurrentLine);
 
         TextEditor.TextArea.TextView.InvalidateMeasure();

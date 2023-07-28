@@ -38,7 +38,6 @@ public class ClientCommunicationService : TasCommunicationServerBase, IClientCom
             case ClientOpCode.SetStudioInfo:
                 var info = StudioInfo.FromByteArray(request);
                 _viewModel.StudioInfo = info.CurrentLine == -1 ? null : info;
-                _viewModel.StudioInfo = info.CurrentLine == -1 ? null : info;
                 break;
             case ClientOpCode.CloseConnection:
                 return true;

@@ -12,7 +12,7 @@ public enum ClientOpCode : byte {
 
 public enum ServerOpCode : byte {
     KeybindTriggered,
-    SendPath // String
+    SendPath // String ("" for none)
 }
 
 public enum TasKeybind : byte {
