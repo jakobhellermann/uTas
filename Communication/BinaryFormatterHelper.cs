@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 #pragma warning disable SYSLIB0011 // TODO migrate away

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
@@ -29,8 +30,6 @@ public class App : Application {
         // Without this line you will get duplicate validations from both Avalonia and CT
         BindingPlugins.DataValidators.RemoveAt(0);
 
-        var cancellationTokenSource = new CancellationTokenSource();
-
         var settings = SettingsService.Settings;
         var viewModel = new MainViewModel(new DummyClientCommunicationService(), TasEditingService) {
             CurrentFilePath = settings.CurrentFile
@@ -41,8 +40,10 @@ public class App : Application {
             viewModel.ClientCommunicationService = _clientCommunicationService;
             _ = Task.Run(async () => {
                 try {
-                    await _clientCommunicationService.Start(IPAddress.Any, Port, cancellationTokenSource.Token);
+                    await _clientCommunicationService.Start(IPAddress.Any, Port);
                 } catch (OperationCanceledException) {
+                } catch (SocketException e) {
+                    if (e.SocketErrorCode != SocketError.OperationAborted) throw;
                 } catch (Exception e) {
                     Console.WriteLine(e);
                     throw;
@@ -54,10 +55,7 @@ public class App : Application {
             desktop.MainWindow = new MainWindow {
                 DataContext = viewModel
             };
-            desktop.Exit += (_, _) => {
-                cancellationTokenSource.Cancel();
-                _clientCommunicationService.Dispose();
-            };
+            desktop.Exit += (_, _) => _clientCommunicationService.Dispose();
         } else if (ApplicationLifetime is ISingleViewApplicationLifetime singleViewPlatform) {
             singleViewPlatform.MainView = new MainView {
                 DataContext = viewModel

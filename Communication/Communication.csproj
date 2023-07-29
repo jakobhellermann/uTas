@@ -2,12 +2,15 @@
 
     <PropertyGroup>
         <AssemblyName>uTasCommunication</AssemblyName>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFrameworks>net472;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <DebugType>embedded</DebugType>
         <RootNamespace>uTas.Communication</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>false</ImplicitUsings>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -17,6 +20,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="NuGet.Build.Tasks.Pack" Version="6.6.1"/>
+        <PackageReference Include="NuGet.Build.Tasks.Pack" Version="6.6.1" />
     </ItemGroup>
 </Project>

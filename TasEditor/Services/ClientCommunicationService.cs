@@ -26,8 +26,8 @@ public class ClientCommunicationService : TasCommunicationServerBase, IClientCom
         await SendToAll((byte)ServerOpCode.SendPath, path ?? "");
     }
 
-    protected override async Task<bool> ProcessRequest(byte opcodeByte, byte[] request) {
-        switch ((ClientOpCode)opcodeByte) {
+    protected override async Task<bool> ProcessRequest(ClientOpCode opcode, byte[] request) {
+        switch (opcode) {
             case ClientOpCode.EstablishConnection:
                 _viewModel.ConnectionState = "Connected";
                 await SendPath(_viewModel.CurrentFilePath);
@@ -39,10 +39,12 @@ public class ClientCommunicationService : TasCommunicationServerBase, IClientCom
                 var info = StudioInfo.FromByteArray(request);
                 _viewModel.StudioInfo = info.CurrentLine == -1 ? null : info;
                 break;
+            case ClientOpCode.SendKeybindings:
+                break;
             case ClientOpCode.CloseConnection:
                 return true;
             default:
-                _viewModel.ConnectionState = $"Unexpected opcode {opcodeByte}";
+                _viewModel.ConnectionState = $"Unexpected opcode {opcode}";
                 break;
         }
 
