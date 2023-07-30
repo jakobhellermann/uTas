@@ -1,4 +1,4 @@
-﻿namespace uTas.Communication;
+namespace uTas.Communication;
 
 // every String is UTF-8, every integer is big endian unless spcified otherwise
 
