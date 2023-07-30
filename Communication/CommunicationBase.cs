@@ -10,7 +10,7 @@ public abstract class CommunicationBase {
     private SemaphoreSlim _recvMutex = new(1);
 
 
-    protected async Task Send(Stream stream, byte opcode, byte[] data, CancellationToken cancellationToken) {
+    internal async Task Send(Stream stream, byte opcode, byte[] data, CancellationToken cancellationToken) {
         await _sendMutex.WaitAsync(cancellationToken);
 
         try {
@@ -24,7 +24,7 @@ public abstract class CommunicationBase {
         }
     }
 
-    protected async Task<(byte, byte[])> Recv(Stream stream, CancellationToken cancellationToken) {
+    internal async Task<(byte, byte[])> Recv(Stream stream, CancellationToken cancellationToken) {
         await _recvMutex.WaitAsync(cancellationToken);
         try {
             var headerBuffer = await stream.ReadExactlyAsync(5, cancellationToken);

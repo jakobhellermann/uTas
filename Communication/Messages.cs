@@ -5,7 +5,7 @@
 public enum ClientOpCode : byte {
     EstablishConnection = 0,
     CloseConnection = 1,
-    SetInfoString = 2, // String
+    SetInfoText = 2, // String
     SetStudioInfo = 3, // StudioInfo
     SendKeybindings = 4
 }

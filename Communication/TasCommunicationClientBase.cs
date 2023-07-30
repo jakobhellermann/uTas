@@ -12,6 +12,14 @@ public abstract class TasCommunicationClientBase : CommunicationBase, IDisposabl
     private readonly int _port;
     private readonly int _retryInterval;
 
+    protected TasCommunicationClientBase(int port, int retryInterval) {
+        _port = port;
+        _retryInterval = retryInterval;
+    }
+
+
+    #region IPC
+
     private TcpClient? _tcpClient;
     public bool Connected => _started;
 
@@ -22,12 +30,6 @@ public abstract class TasCommunicationClientBase : CommunicationBase, IDisposabl
     private CancellationToken HandlerCancellationToken => _retryLoopTokenSource.Token;
 
     private bool _started;
-
-    protected TasCommunicationClientBase(int port, int retryInterval) {
-        _port = port;
-        _retryInterval = retryInterval;
-    }
-
 
     public void StartConnectionLoop() {
         Task.Run(RetryConnectionLoop);
@@ -64,7 +66,7 @@ public abstract class TasCommunicationClientBase : CommunicationBase, IDisposabl
         Dispose();
     }
 
-    private void Restart() {
+    public void Restart() {
         _handlerTokenSource.Cancel();
         _handlerTokenSource = new CancellationTokenSource();
         _tcpClient?.Dispose();
@@ -91,12 +93,11 @@ public abstract class TasCommunicationClientBase : CommunicationBase, IDisposabl
                 }
             }
         } catch (EndOfStreamException) {
-            Log($"got end of stream without shutdown");
+            Log($"Connection to Server lost");
         } catch (Exception e) {
-            Log($"error receiving from server: {e}");
+            Log($"Error receiving from server: {e}");
         }
     }
-
 
     public async Task Send(ClientOpCode opcode, byte[] data) {
         if (_tcpClient is null) throw new Exception("attempted to send into unconnected client");
@@ -104,7 +105,7 @@ public abstract class TasCommunicationClientBase : CommunicationBase, IDisposabl
         try {
             await base.Send(_tcpClient.GetStream(), (byte)opcode, data, HandlerCancellationToken);
         } catch (Exception exception) {
-            Log($"Exception talking to server, restarting: {exception}");
+            Log($"Exception talking to server, restarting: {exception.Message}");
             Restart();
         }
     }
@@ -117,16 +118,45 @@ public abstract class TasCommunicationClientBase : CommunicationBase, IDisposabl
         await Send(opcode, new byte[] { });
     }
 
-
     public void Dispose() {
         _handlerTokenSource.Cancel();
         _retryLoopTokenSource.Cancel();
         _tcpClient?.Dispose();
     }
 
+    #endregion IPC
+
+    public Task SendEstablishConnection() => Send(ClientOpCode.EstablishConnection);
+
+    public Task SendCloseConnection() => Send(ClientOpCode.CloseConnection);
+
+    public Task SendInfoText(string? infoText) => Send(ClientOpCode.SetInfoText, infoText ?? "");
+
+    public Task SendStudioInfo(StudioInfo? studioInfo) =>
+        Send(ClientOpCode.SetInfoText, (studioInfo ?? StudioInfo.Invalid).ToByteArray());
+
+    private void OnMessage(ServerOpCode opcode, byte[] data) {
+        switch (opcode) {
+            case ServerOpCode.KeybindTriggered:
+                var keybind = (TasKeybind)data[0];
+                OnKeybindTriggered(keybind);
+                break;
+            case ServerOpCode.SendPath:
+                var path = Encoding.UTF8.GetString(data);
+                OnSendPath(path == "" ? null : path);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(opcode), opcode, null);
+        }
+    }
+
+
     protected abstract void Log(string msg);
 
-    protected abstract void OnConnect();
+    protected virtual void OnConnect() {
+    }
 
-    protected abstract void OnMessage(ServerOpCode opcode, byte[] data);
+    protected abstract void OnKeybindTriggered(TasKeybind keybind);
+
+    protected abstract void OnSendPath(string? path);
 }

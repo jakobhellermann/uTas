@@ -14,44 +14,28 @@ public class ClientCommunicationService : TasCommunicationServerBase, IClientCom
         _viewModel = viewModel;
     }
 
-
-    public async Task SendKeybind(TasKeybind keybind) {
-        Console.WriteLine($"Sending keybind {keybind}");
-        var data = new[] { (byte)keybind };
-        await SendToAll((byte)ServerOpCode.KeybindTriggered, data);
+    protected override void OnEstablishConnection() {
+        _viewModel.ConnectionState = "Connected";
+        Console.WriteLine("established connection: sending path");
+        Task.Run(() => SendPath(_viewModel.CurrentFilePath));
     }
 
-    public async Task SendPath(string? path) {
-        Console.WriteLine($"Path is {path ?? "<null>"}");
-        await SendToAll((byte)ServerOpCode.SendPath, path ?? "");
+    protected override void OnCloseConnection() {
     }
 
-    protected override async Task<bool> ProcessRequest(ClientOpCode opcode, byte[] request) {
-        switch (opcode) {
-            case ClientOpCode.EstablishConnection:
-                _viewModel.ConnectionState = "Connected";
-                await SendPath(_viewModel.CurrentFilePath);
-                break;
-            case ClientOpCode.SetInfoString:
-                _viewModel.InfoText = Encoding.UTF8.GetString(request);
-                break;
-            case ClientOpCode.SetStudioInfo:
-                var info = StudioInfo.FromByteArray(request);
-                _viewModel.StudioInfo = info.CurrentLine == -1 ? null : info;
-                break;
-            case ClientOpCode.SendKeybindings:
-                break;
-            case ClientOpCode.CloseConnection:
-                return true;
-            default:
-                _viewModel.ConnectionState = $"Unexpected opcode {opcode}";
-                break;
-        }
-
-        return false;
+    protected override void OnSetInfoText(string infoText) {
+        _viewModel.InfoText = infoText;
     }
 
-    protected override void OnClosedConnection(TcpClient client, bool gracefully) {
+    protected override void OnSetStudioInfo(StudioInfo? info) {
+        _viewModel.StudioInfo = info;
+    }
+
+    protected override void OnSendKeybindings() {
+        throw new NotImplementedException();
+    }
+
+    protected override void OnAnyConnectionClosed(bool gracefully) {
         if (_viewModel.ConnectionState == "Connected") {
             _viewModel.ConnectionState = gracefully ? "Searching..." : "Searching... (Closed without message)";
             _viewModel.InfoText = "";
