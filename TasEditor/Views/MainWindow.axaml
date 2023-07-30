@@ -7,7 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="800"
         x:Class="TasEditor.Views.MainWindow"
         x:DataType="viewModels:MainViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/logo.png"
         Title="{Binding CurrentFileName}"
 
         ExtendClientAreaToDecorationsHint="True"

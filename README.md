@@ -1,6 +1,13 @@
 # uTas
 
-> [Celeste](https://github.com/EverestAPI/CelesteTAS-EverestInterop)-inspired universal (game-independent) TAS tooling.
+<img src="./docs/logo/logo_wind.png" align="left" height="128px" alt="logo image, the letter U inside a purple gradient circle">
+
+<br>
+
+[Celeste](https://github.com/EverestAPI/CelesteTAS-EverestInterop)-inspired universal (game-independent) TAS tooling.
+
+<br clear="left" />
+<br />
 
 Examples of games with support for uTas:
 
