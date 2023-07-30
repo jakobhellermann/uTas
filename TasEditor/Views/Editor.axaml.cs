@@ -6,7 +6,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
-using AvaloniaEdit.Editing;
 using AvaloniaEdit.TextMate;
 using TasEditor.Services;
 using TasEditor.ViewModels;
@@ -23,6 +22,8 @@ public partial class Editor : UserControl {
     private MainViewModel MainViewModel => (MainViewModel)DataContext!;
     private ITasEditingService TasEditingService => App.TasEditingService;
 
+    private const ThemeName DefaultTheme = ThemeName.Monokai;
+
     public Editor() {
         InitializeComponent();
 
@@ -33,8 +34,7 @@ public partial class Editor : UserControl {
 
         FrameByFrameEditor.OnChange = OnFrameByFrameEditorChange;
 
-
-        var registryOptions = new RegistryOptions(ThemeName.DarkPlus);
+        var registryOptions = new RegistryOptions(DefaultTheme);
         var textMateInstallation = TextEditor.InstallTextMate(registryOptions);
         textMateInstallation.SetGrammar(registryOptions.GetScopeByLanguageId("julia"));
 
@@ -61,7 +61,7 @@ public partial class Editor : UserControl {
     }
 
     private void OnCurrentFilePathChanged(string? currentFilePath) {
-        if (MainViewModel.CurrentFilePath is not { } path) {
+        if (currentFilePath is not { } path) {
             TextEditor.Text = "";
             return;
         }
