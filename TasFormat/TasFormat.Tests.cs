@@ -13,8 +13,7 @@ public class TasFormatTests {
    1,R,U,X
    1,R,U,X
    1,R
-   1,    
-    R
+   1,R
 """;
         var inputs = TasFile.Parse(input);
         inputs.Expand();
