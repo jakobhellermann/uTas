@@ -12,6 +12,22 @@
         <viewModels:MainViewModel />
     </Design.DataContext>
     <UserControl.Resources>
+        <!-- ReSharper disable once Xaml.RedundantResource rider is gaslighting me -->
+        <ContextMenu x:Key="EditorContextMenu" Placement="Pointer">
+            <MenuItem Header="Insert/Remove Breakpoint" IsEnabled="false" />
+            <MenuItem Header="_Remove All Breakpoints" HotKey="Ctrl+P" InputGesture="Ctrl+P" IsEnabled="false" />
+            <Separator />
+            <MenuItem Header="Insert Room Name" HotKey="Ctrl+R" InputGesture="Ctrl+P" IsEnabled="false" />
+            <MenuItem Header="Insert Current In-Game Time" HotKey="Ctrl+T" InputGesture="Ctrl+T" IsEnabled="false" />
+            <MenuItem Header="Insert Command" IsEnabled="false">
+                <MenuItem Header="console load" />
+                <MenuItem Header="Set" />
+                <MenuItem Header="AutoInput" />
+                <MenuItem Header="StunPause" />
+            </MenuItem>
+            <Separator />
+            <MenuItem Header="Open Frame-by-Frame Editor" Click="OpenFrameByFrameEditor" />
+        </ContextMenu>
 
     </UserControl.Resources>
 
