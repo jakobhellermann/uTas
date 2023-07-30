@@ -5,7 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Media;
-using TasFormat;
+using uTas.TasFormat;
 
 namespace TasEditor.Views;
 
@@ -16,7 +16,7 @@ public partial class FrameByFrameEditor : UserControl {
 
     private List<string> _inputKinds = new();
     private List<string[]> _frameInputs = new();
-    private TasFile _tasInputs = new TasFile(new List<TasLineInfo>());
+    private TasFile _tasInputs = new(new List<TasLineInfo>());
 
     public Action<string> OnChange = (_) => { };
 
@@ -27,16 +27,12 @@ public partial class FrameByFrameEditor : UserControl {
         foreach (var lineInfo in tasInputs.Lines) {
             if (lineInfo.Line is not TasLine.FrameInput input) continue;
 
-            foreach (var key in input.Inputs) {
-                if (!_inputKinds.Contains(key.Key)) {
+            foreach (var key in input.Inputs)
+                if (!_inputKinds.Contains(key.Key))
                     _inputKinds.Add(key.Key);
-                }
-            }
 
             var inputs = input.Inputs.Select(i => i.Key).ToArray();
-            for (var i = 0; i < input.FrameCount; i++) {
-                _frameInputs.Add(inputs);
-            }
+            for (var i = 0; i < input.FrameCount; i++) _frameInputs.Add(inputs);
         }
 
         tasInputs.Expand();
@@ -53,9 +49,7 @@ public partial class FrameByFrameEditor : UserControl {
 
         InputGrid.RowDefinitions.Clear();
         InputGrid.RowDefinitions.Add(new RowDefinition(height));
-        for (var i = 0; i < _frameInputs.Count; i++) {
-            InputGrid.RowDefinitions.Add(new RowDefinition(height));
-        }
+        for (var i = 0; i < _frameInputs.Count; i++) InputGrid.RowDefinitions.Add(new RowDefinition(height));
 
         InputGrid.Children.Clear();
 
@@ -96,16 +90,14 @@ public partial class FrameByFrameEditor : UserControl {
         }
     }
 
-    void OnInputToggled(int frame, int input) {
+    private void OnInputToggled(int frame, int input) {
         var frameInputs = _frameInputs[frame];
         var toggledInput = _inputKinds[input];
 
         var tasInputIndex = 0;
-        for (var i = 0; i < frame; i++) {
-            if (_tasInputs.Lines[i].Line is TasLine.FrameInput) {
+        for (var i = 0; i < frame; i++)
+            if (_tasInputs.Lines[i].Line is TasLine.FrameInput)
                 tasInputIndex += 1;
-            }
-        }
 
 
         var index = Array.IndexOf(frameInputs, toggledInput);

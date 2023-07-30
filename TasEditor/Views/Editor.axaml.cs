@@ -11,9 +11,9 @@ using AvaloniaEdit.TextMate;
 using TasEditor.Services;
 using TasEditor.ViewModels;
 using TasEditor.Views.Editing;
-using TasFormat;
 using TextMateSharp.Grammars;
 using uTas.Communication;
+using uTas.TasFormat;
 
 namespace TasEditor.Views;
 

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TasFormat;
+namespace uTas.TasFormat;
 
 // ReSharper disable once InconsistentNaming
 public interface TasLine {

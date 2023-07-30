@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 // ReSharper disable ReplaceSubstringWithRangeIndexer net472 compat :(
 
-namespace TasFormat;
+namespace uTas.TasFormat;
 
 public partial record TasFile {
     public static TasFile Parse(string file) {

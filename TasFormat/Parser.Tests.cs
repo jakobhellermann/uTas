@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
 
-namespace TasFormat;
+namespace uTas.TasFormat;
 
 public class ParserTests {
     [Test]

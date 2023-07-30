@@ -1,8 +1,7 @@
 using System;
-
-namespace TasFormat;
-
 using NUnit.Framework;
+
+namespace uTas.TasFormat;
 
 public class TasFormatTests {
     [Test]

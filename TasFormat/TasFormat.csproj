@@ -5,7 +5,7 @@
         <TargetFrameworks>net472;net7.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <DebugType>embedded</DebugType>
-        <RootNamespace>uTas.Format</RootNamespace>
+        <RootNamespace>uTas.TasFormat</RootNamespace>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>false</ImplicitUsings>

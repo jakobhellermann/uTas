@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace TasFormat;
+namespace uTas.TasFormat;
 
 public record TasLineInfo(TasLine Line, int LineNumber);
 

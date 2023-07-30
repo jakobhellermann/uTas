@@ -1,7 +1,7 @@
 using System;
 using AvaloniaEdit.Document;
 using AvaloniaEdit.Editing;
-using TasFormat;
+using uTas.TasFormat;
 
 namespace TasEditor.Services;
 
