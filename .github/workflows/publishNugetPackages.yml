@@ -1,0 +1,25 @@
+name: Publish nuget packages
+
+on:
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 7.0
+          source-url: https://api.nuget.org/v3/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.NUGET_TOKEN}}
+      - name: Build
+        run: |
+          dotnet build --configuration Release Communication
+          dotnet build --configuration Release TasFormat
+      - name: Publish
+        run: |
+          dotnet nuget push Communication/bin/Release/uTas.Communication.*.nupkg
+          dotnet nuget push Communication/bin/Release/uTas.TasFormat.*.nupkg
