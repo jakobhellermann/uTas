@@ -1,12 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <AssemblyName>uTasFormat</AssemblyName>
         <TargetFrameworks>net472;net7.0</TargetFrameworks>
-        <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <ImplicitUsings>false</ImplicitUsings>
-        <LangVersion>11</LangVersion>
         <DebugType>embedded</DebugType>
+        <RootNamespace>uTas.Format</RootNamespace>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>false</ImplicitUsings>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(Configuration)' == 'Release'">
@@ -19,5 +22,10 @@
         <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
     </ItemGroup>
 
-
+    <PropertyGroup>
+        <PackageId>uTas.TasFormat</PackageId>
+        <Version>0.1.0</Version>
+        <Description>Shared code for uTas Editor and ingame clients</Description>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
 </Project>
