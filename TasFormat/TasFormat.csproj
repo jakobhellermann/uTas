@@ -24,8 +24,9 @@
 
     <PropertyGroup>
         <PackageId>uTas.TasFormat</PackageId>
-        <Version>0.1.0</Version>
-        <Description>Shared code for uTas Editor and ingame clients</Description>
+        <Version>0.2.0</Version>
+        <Description>Parser and utilities for working with the uTas TAS Format</Description>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/jakobhellermann/uTas</RepositoryUrl>
     </PropertyGroup>
 </Project>
