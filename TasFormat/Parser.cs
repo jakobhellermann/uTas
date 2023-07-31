@@ -49,15 +49,32 @@ public partial record TasFile {
 
             if (int.TryParse(beforeComma, out var frameCount)) {
                 var inputs = new HashSet<Input>();
-                var inputStrings = afterComma.Split(',');
+                var inputStrings = afterComma.SplitWithBalancedParenthesis();
                 foreach (var inputString in inputStrings) {
                     var inputStringTrimmed = inputString.Trim();
                     if (inputStringTrimmed.IsWhiteSpace()) continue;
 
-                    if (Regex.IsMatch(inputStringTrimmed, @"^[a-zA-Z]$"))
+                    if (Regex.Match(inputStringTrimmed, @"^([a-zA-Z])\(([^)]*)\)$") is { Success: true } match) {
+                        var action = match.Groups[1];
+                        var content = match.Groups[2];
+
+                        var values = content.ToString().Split(',')
+                            .Select(valueString => {
+                                if (double.TryParse(valueString.Trim(), out var value))
+                                    return value;
+                                else
+                                    throw new ArgumentException(
+                                        $"Cannot parse '{inputStringTrimmed}' as action: '{valueString}' is not a double"
+                                    );
+                            })
+                            .ToList();
+
+                        inputs.Add(new Input(action.ToString(), values));
+                    } else if (Regex.IsMatch(inputStringTrimmed, @"^[a-zA-Z]$")) {
                         inputs.Add(new Input(inputStringTrimmed));
-                    else
+                    } else {
                         throw new Exception($"unexpected input `{inputStringTrimmed}` in line `{afterComma}`");
+                    }
                 }
 
                 tasLines.Add(
@@ -88,5 +105,41 @@ public partial record TasFile {
 internal static class Extensions {
     public static bool IsWhiteSpace(this string s) {
         return s.All(k => k is ' ' or '\t');
+    }
+
+
+    public static List<string> SplitWithBalancedParenthesis(this string input) {
+        var result = new List<string>();
+        var parenthesisCount = 0;
+        var startIndex = 0;
+
+        var addItem = (string item) => {
+            item = item.Trim();
+            result.Add(item);
+        };
+
+
+        for (var i = 0; i < input.Length; i++) {
+            var c = input[i];
+
+            switch (c) {
+                case '(':
+                    parenthesisCount++;
+                    break;
+                case ')':
+                    parenthesisCount--;
+                    break;
+                case ',' when parenthesisCount == 0:
+                    var item = input.Substring(startIndex, i - startIndex);
+                    addItem(item);
+                    startIndex = i + 1;
+
+                    break;
+            }
+        }
+
+        addItem(input.Substring(startIndex));
+
+        return result;
     }
 }

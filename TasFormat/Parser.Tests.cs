@@ -153,7 +153,13 @@ Add 58
  427
 
 Read,LoadJournal,0,Any%
-"
+",
+            """
+            M(10, 20)
+            M(10.1234, 20.4556)
+            S()
+            S(1)
+            """
         };
 
         foreach (var input in inputs) TasFile.Parse(input);

@@ -51,6 +51,9 @@ public interface TasLine {
     }
 }
 
-public readonly record struct Input(string Key) {
-    public override string ToString() => Key;
+public readonly record struct Input(string Key, List<double> Values) {
+    public Input(string Key) : this(Key, new List<double>()) {
+    }
+
+    public override string ToString() => Values.Count == 0 ? Key : $"{Key}({string.Join(",", Values)})";
 }
