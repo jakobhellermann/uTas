@@ -2,7 +2,8 @@
 
 <img src="./docs/logo/logo_wind.png" align="left" height="128px" alt="logo image, the letter U inside a purple gradient circle">
 
-<br>
+<a href="https://www.nuget.org/packages/uTas.TasFormat/" alt="Contributors"><img src="https://img.shields.io/nuget/v/uTas.TasFormat?label=uTas.TasFormat&color=green"/></a>
+<a href="https://www.nuget.org/packages/uTas.Communication/" alt="Contributors"><img src="https://img.shields.io/nuget/v/uTas.Communication?label=uTas.Communication&color=green"/></a>
 
 [Celeste](https://github.com/EverestAPI/CelesteTAS-EverestInterop)-inspired universal (game-independent) TAS tooling.
 
