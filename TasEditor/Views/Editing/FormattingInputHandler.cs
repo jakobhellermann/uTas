@@ -17,7 +17,7 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
 
     private static bool InterestedInKey(Key key) =>
         key is >= Key.A and <= Key.Z or >= Key.D0 and <= Key.D9 or >= Key.NumPad0 and <= Key.NumPad9
-            or Key.Enter or Key.Back or Key.Space;
+            or Key.Enter or Key.Back or Key.Space or Key.OemComma;
 
     private TextViewPosition _newPosition;
 
@@ -57,6 +57,9 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
             case Key.Space:
                 e.Handled = OnSpace(line, lineText, position.Column);
                 break;
+            case Key.OemComma:
+                e.Handled = OnComma(line, lineText, position.Column);
+                break;
         }
 
         if (handled is { } text) {
@@ -71,6 +74,8 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
 
         var isFrameInputLine = IsFrameInputLine(line, true);
         if (!isFrameInputLine) return null;
+
+        if (IsInsideValuedAction(line, columnIndex)) return null;
 
         var commaIndex = line.IndexOf(',');
         var beforeComma = commaIndex == -1 ? line : line[..commaIndex];
@@ -98,28 +103,50 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
         return ToggleKey(line, key);
     }
 
+    private bool IsAction(string action, string actionValue) {
+        var parenIndex = actionValue.IndexOf('(', StringComparison.Ordinal);
+        var beforeParen = parenIndex == -1 ? actionValue : actionValue[..parenIndex];
+        return beforeParen == action;
+    }
 
-    private static string ToggleKey(string line, char key) {
+
+    private string ToggleKey(string line, char key) {
         var commaIndex = line.IndexOf(',');
         var beforeComma = commaIndex == -1 ? line.AsSpan() : line.AsSpan()[..commaIndex];
         var afterComma = commaIndex == -1 ? "" : line[(commaIndex + 1)..];
 
         var keyString = key.ToString();
 
-        var keys = afterComma
-            .Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList();
-        if (keys.Contains(keyString)) {
-            keys.Remove(keyString);
+        var actionValueCount = ValuedActions.GetValueOrDefault(keyString);
+
+        bool added;
+
+        var keys = SplitWithBalancedParenthesis(afterComma,
+            StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+        if (keys.Any(k => IsAction(keyString, k))) {
+            keys.RemoveAll(k => IsAction(keyString, k));
+            added = false;
         } else {
-            keys.Add(keyString);
+            keys.Add(actionValueCount == 0 ? keyString : $"{keyString}({new string(',', actionValueCount - 1)})");
 
             if (RemoveExclusiveActions && ExclusiveActions.TryGetValue(keyString, out var excludes))
                 keys.RemoveAll(k => excludes.Contains(k));
+            added = true;
         }
 
         SortKeys(keys);
 
-        return $"{beforeComma},{string.Join(',', keys)}";
+        var newLine = $"{beforeComma},{string.Join(',', keys)}";
+
+        if (added && actionValueCount > 0) {
+            var columnIndex = newLine.IndexOf($"{keyString}(", StringComparison.Ordinal);
+            _newPosition.Column = columnIndex + 1 + keyString.Length + 1;
+        } else {
+            _newPosition.Column = commaIndex + 2;
+        }
+
+        return newLine;
     }
 
     private void RemoveLine(ISegment line) {
@@ -149,6 +176,8 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
         var columnIndex = column - 1;
         var isFrameInputLine = IsFrameInputLine(line);
         if (!isFrameInputLine) return false;
+
+        if (IsInsideValuedAction(line, columnIndex)) return false;
 
         var commaIndex = line.IndexOf(',');
         if (commaIndex == -1) return false;
@@ -204,12 +233,27 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
 
     private bool OnSpace(IDocumentLine documentLine, string line, int column) {
         if (!IsFrameInputLine(line)) return false;
+        if (IsInsideValuedAction(line, column - 1)) return false;
 
         var commaIndex = line.IndexOf(',');
         var newColumnIndex = commaIndex == -1 ? line.Length : commaIndex;
 
         TextArea.Caret.Column = newColumnIndex + 1;
         return true;
+    }
+
+    private bool OnComma(IDocumentLine documentLine, string line, int column) {
+        var columnIndex = column - 1;
+
+        if (!IsFrameInputLine(line)) return false;
+        if (!IsInsideValuedAction(line, columnIndex)) return false;
+
+        if (TextArea.Document.GetCharAt(documentLine.Offset + columnIndex) == ',') {
+            TextArea.Caret.Offset += 1;
+            return true;
+        }
+
+        return false;
     }
 
     private bool IsFrameInputLine(ReadOnlySpan<char> line, bool countEmpty = false) {
@@ -230,6 +274,11 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
         { "D", new[] { "U" } }
     };
 
+    private static readonly Dictionary<string, int> ValuedActions = new() {
+        { "M", 2 },
+        { "S", 1 }
+    };
+
     private static void SortKeys(List<string> keys) {
         keys.Sort((a, b) => {
             var indexA = Array.IndexOf(SortedKeys, a);
@@ -242,5 +291,48 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
 
             throw new Exception();
         });
+    }
+
+    private static bool IsInsideValuedAction(string line, int index) {
+        if (index == 0) return false;
+        var prevParenOpen = line.LastIndexOf('(', index - 1, index - 1);
+        var prevParenClose = line.LastIndexOf(')', index - 1, index - 1);
+        return prevParenOpen > prevParenClose;
+    }
+
+
+    private static List<string> SplitWithBalancedParenthesis(string input, StringSplitOptions options) {
+        var result = new List<string>();
+        var parenthesisCount = 0;
+        var startIndex = 0;
+
+        var addItem = (string item) => {
+            if ((options & StringSplitOptions.TrimEntries) != 0) item = item.Trim();
+            if (!((options & StringSplitOptions.RemoveEmptyEntries) != 0 && item.Length == 0)) result.Add(item);
+        };
+
+
+        for (var i = 0; i < input.Length; i++) {
+            var c = input[i];
+
+            switch (c) {
+                case '(':
+                    parenthesisCount++;
+                    break;
+                case ')':
+                    parenthesisCount--;
+                    break;
+                case ',' when parenthesisCount == 0:
+                    var item = input.Substring(startIndex, i - startIndex);
+                    addItem(item);
+                    startIndex = i + 1;
+
+                    break;
+            }
+        }
+
+        addItem(input[startIndex..]);
+
+        return result;
     }
 }
