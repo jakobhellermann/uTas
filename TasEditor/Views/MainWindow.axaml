@@ -35,7 +35,7 @@
 
         <KeyBinding Gesture="OemMinus" Command="{Binding StartStop}" />
         <KeyBinding Gesture="OemPlus" Command="{Binding FrameAdvance}" />
-        <KeyBinding Gesture="OemPeriod" Command="{Binding PauseResume}" />
+        <KeyBinding Gesture="Divide" Command="{Binding PauseResume}" />
     </Window.KeyBindings>
 
     <Panel>
