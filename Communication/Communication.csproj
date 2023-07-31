@@ -14,7 +14,7 @@
 
     <PropertyGroup>
         <PackageId>uTas.Communication</PackageId>
-        <Version>0.2.0</Version>
+        <Version>0.3.0</Version>
         <Description>Shared code for uTas Editor and ingame clients</Description>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/jakobhellermann/uTas</RepositoryUrl>
