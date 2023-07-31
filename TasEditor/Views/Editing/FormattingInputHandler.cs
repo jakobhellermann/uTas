@@ -284,8 +284,8 @@ public class FormattingInputHandler : TextAreaStackedInputHandler {
             var indexA = Array.IndexOf(SortedKeys, a);
             var indexB = Array.IndexOf(SortedKeys, b);
 
-            if (indexA == -1 && indexB != -1) return -1;
-            if (indexA != -1 && indexB == -1) return 1;
+            if (indexA == -1 && indexB != -1) return 1;
+            if (indexA != -1 && indexB == -1) return -1;
             if (indexA == -1 && indexB == -1) return string.Compare(a, b, StringComparison.Ordinal);
             if (indexA != -1 && indexB != -1) return indexA.CompareTo(indexB);
 
