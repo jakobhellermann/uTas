@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -40,6 +41,7 @@ public interface TasLine {
         public virtual bool Equals(FrameInput? other) {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
+
             return FrameCount == other.FrameCount && Inputs.SetEquals(other.Inputs);
         }
 
@@ -51,9 +53,28 @@ public interface TasLine {
     }
 }
 
-public readonly record struct Input(string Key, List<double> Values) {
+public record Input(string Key, List<double> Values) {
     public Input(string Key) : this(Key, new List<double>()) {
     }
 
     public override string ToString() => Values.Count == 0 ? Key : $"{Key}({string.Join(",", Values)})";
+
+    public virtual bool Equals(Input? other) {
+        if (other is null) return false;
+
+        return this.Key == other.Key && this.Values.SequenceEqual(other.Values);
+    }
+
+    public override int GetHashCode() {
+        unchecked {
+            var key = Key.GetHashCode() * 379;
+
+            var hash = 19;
+            foreach (var item in Values) {
+                hash = hash * 31 + item.GetHashCode();
+            }
+
+            return key ^ hash;
+        }
+    }
 }

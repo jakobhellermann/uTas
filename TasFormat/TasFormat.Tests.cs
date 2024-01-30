@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace uTas.TasFormat;
@@ -7,14 +8,14 @@ public class TasFormatTests {
     [Test]
     public void Expand() {
         const string input = "4,R,U,X\n2,R";
-        const string expected = """
-   1,R,U,X
-   1,R,U,X
-   1,R,U,X
-   1,R,U,X
-   1,R
-   1,R
-""";
+        string expected = """
+                             1,R,U,X
+                             1,R,U,X
+                             1,R,U,X
+                             1,R,U,X
+                             1,R
+                             1,R
+                          """.Replace(Environment.NewLine, "\n");
         var inputs = TasFile.Parse(input);
         inputs.Expand();
         var result = inputs.ToTasFormat();
@@ -34,20 +35,19 @@ public class TasFormatTests {
         Assert.AreEqual("   1,R\n   1,R,U", inputs.ToTasFormat());
     }
 
-
     [Test]
     public void Combine() {
         const string input = """
-           2,R
-           3,R
-           2,R,J
-           1,R
-        """;
-        const string expected = """
-           5,R
-           2,R,J
-           1,R
-        """;
+                                2,R
+                                3,R
+                                2,R,J
+                                1,R
+                             """;
+        string expected = """
+                             5,R
+                             2,R,J
+                             1,R
+                          """.Replace(Environment.NewLine, "\n");
         var inputs = TasFile.Parse(input);
         inputs.Combine();
         var result = inputs.ToTasFormat();
@@ -58,14 +58,14 @@ public class TasFormatTests {
 
     [Test]
     public void CombineWithNoninputlines() {
-        const string input = """
-        Set, Something, 42
-           2,R
-        Set, Player.Position, 10
-           3,R
-           2,R,J
-           1,R
-        """;
+        string input = """
+                       Set, Something, 42
+                          2,R
+                       Set, Player.Position, 10
+                          3,R
+                          2,R,J
+                          1,R
+                       """.Replace(Environment.NewLine, "\n");
         var inputs = TasFile.Parse(input);
         inputs.Combine();
         var result = inputs.ToTasFormat();
@@ -76,10 +76,10 @@ public class TasFormatTests {
 
     [Test]
     public void ExpandCollapseRoundtrip() {
-        const string input = """
-           4,R,U,X
-           2,R
-        """;
+        string input = """
+                          4,R,U,X
+                          2,R
+                       """.Replace(Environment.NewLine, "\n");
         var inputs = TasFile.Parse(input);
         inputs.Expand();
         inputs.Combine();
